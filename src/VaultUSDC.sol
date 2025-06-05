@@ -1,36 +1,62 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.30;
+pragma solidity 0.8.24;
 
-import {Token} from "./Token.sol";
-import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-contract VaultUSDC {
-    error VaultUSDC__InsuficientAmount();
-    event deposited(address user, uint256 amount);
+import {ERC4626} from "@openzeppelin/contracts/token/ERC20/extensions/ERC4626.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+import {Pausable} from "@openzeppelin/contracts/utils/Pausable.sol";
+import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import {SafeTransferLib} from "solmate/utils/SafeTransferLib.sol";
 
-    IERC20 public token;
-
-    mapping(address user => uint256 amount) public s_tokenDeposits;
-
-
-    constructor() {
-        //USDC sepolia testnet address
-        token = IERC20(0x8267cF9254734C6Eb452a7bb9AAF97B392258b21);
+interface IStragety{
+    function despoit(uint256 amount) external;
+    function withdraw(uint256 amount) external;
+    function totalAssets() external view returns(uint256);
+    function harvest()external returns(uint256);
     }
 
-    function deposit(uint256 amount) public {
-        if(amount <= 0) {
-            revert VaultUSDC__InsuficientAmount();
-         }
-        token.transferFrom(msg.sender, address(this), amount);
-        s_tokenDeposits[msg.sender] += amount;
-        emit deposited(msg.sender, amount);
+
+
+
+
+contract VaultUSDC is ERC4626, Pausable, Ownable, ReentrancyGuard {
+
+    using SafeTransferLib for ERC20;
+
+
+    // ============ STATE VARIABLES ============ \\
+    IStragety public strategy;
+    uint256 public depositLimit;
+    uint256 public withdrawLimit;
+    uint256 public managmentFee; //basic points (100 = 1%)
+    uint256 public lastHarvest;
+    uint256 public totalDeposited;
+    
+
+    uint256 public idleCashRatio = 1000; //10%
+
+
+
+    constructor(ERC20 _asset) ERC4626(_asset) ERC20("VaultUSDC", "VUSDC") Ownable(msg.sender) {
+        managmentFee = 200; 
+        depositLimit = 1000000e6;
+        withdrawLimit = 100000e6;
+        lastHarvest = block.timestamp;
     }
+
 
 
     
 
 
 
+    
 
+
+    // constructor() {
+    //     //USDC sepolia testnet address
+    //     token = IERC20(0x8267cF9254734C6Eb452a7bb9AAF97B392258b21);
+    // }
+   
 }
