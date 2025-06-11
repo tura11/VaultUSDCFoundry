@@ -14,11 +14,11 @@ contract VaultUSDC is ERC4626, Ownable, Pausable, ReentrancyGuard {
 
     using SafeERC20 for IERC20;
 
-    error VaultUSDC__DepositExceedsLimit(uint256 requested, uint256 maxAllowed);
-    error VaultUSDC__WithdrawExceedsLimit(uint256 requested, uint256 maxAllowed);
+    error VaultUSDC__DepositExceedsLimit();
+    error VaultUSDC__WithdrawExceedsLimit();
     error VaultUSDC__ZeroAmount();
     error VaultUSDC__InvalidReceiver();
-    error VaultUSDC__InsufficientBalance(uint256 requested, uint256 available);
+    error VaultUSDC__InsufficientBalance();
     error VaultUSDC__TransferFailed();
     error VaultUSDC__VaultPaused();
     error VaultUSDC__InvalidUserAddress();
@@ -60,7 +60,7 @@ contract VaultUSDC is ERC4626, Ownable, Pausable, ReentrancyGuard {
 
     function deposit(uint256 assets, address receiver) public override nonReentrant whenNotPaused validAmount(assets) validAddress(receiver) returns (uint256) {
         if (assets > maxDepositLimit) {
-            revert VaultUSDC__DepositExceedsLimit(assets, maxDepositLimit);
+            revert VaultUSDC__DepositExceedsLimit();
         }
 
         uint256 assetsFee = (assets * managementFee) / 10000;
@@ -88,7 +88,7 @@ contract VaultUSDC is ERC4626, Ownable, Pausable, ReentrancyGuard {
 
     function withdraw(uint256 assets, address receiver, address shareOwner) public override nonReentrant whenNotPaused validAmount(assets) validAddress(receiver) returns (uint256) {
         if (assets > maxWithdrawLimit) {
-            revert VaultUSDC__WithdrawExceedsLimit(assets, maxWithdrawLimit);
+            revert VaultUSDC__WithdrawExceedsLimit();
         }
 
         uint256 shares = super.withdraw(assets, receiver, shareOwner);
@@ -135,7 +135,7 @@ contract VaultUSDC is ERC4626, Ownable, Pausable, ReentrancyGuard {
             revert VaultUSDC__ZeroAmount();
         }
         if (amount > maxDepositLimit) {
-            revert VaultUSDC__DepositExceedsLimit(amount, maxDepositLimit);
+            revert VaultUSDC__DepositExceedsLimit();
         }
         if (user == address(0)) {
             revert VaultUSDC__InvalidUserAddress();
@@ -150,11 +150,11 @@ contract VaultUSDC is ERC4626, Ownable, Pausable, ReentrancyGuard {
             revert VaultUSDC__ZeroAmount();
         }
         if (amount > maxWithdrawLimit) {
-            revert VaultUSDC__WithdrawExceedsLimit(amount, maxWithdrawLimit);
+            revert VaultUSDC__WithdrawExceedsLimit();
         }
         uint256 userAssets = convertToAssets(balanceOf(user));
         if (amount > userAssets) {
-            revert VaultUSDC__InsufficientBalance(amount, userAssets);
+            revert VaultUSDC__InsufficientBalance();
         }
     }
 
