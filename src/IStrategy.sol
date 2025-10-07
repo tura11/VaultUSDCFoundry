@@ -13,4 +13,3 @@ interface IStrategy {
     function emergencyWithdraw() external;
 
 }
-
