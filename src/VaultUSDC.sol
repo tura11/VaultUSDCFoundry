@@ -92,6 +92,7 @@ contract VaultUSDC is ERC4626, Ownable, Pausable, ReentrancyGuard {
         }
         
         userCostBasis[receiver] += assetsAfterFee;
+        userTotalDeposited[receiver] += assetsAfterFee;
         totalDeposited += assetsAfterFee;
 
       
