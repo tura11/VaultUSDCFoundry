@@ -16,6 +16,7 @@ contract AaveYieldFarm is IStrategy {
 
     error AaveYieldFarm__ZeroDeposit();
     error AaveYieldFarm__ZeroAmountToWithdraw();
+    error AaveYieldFarm__InsufficientBalance();
 
 
 
@@ -30,7 +31,15 @@ contract AaveYieldFarm is IStrategy {
     IERC20 public aToken; // aUSDC
     bool public active;
 
-    modifier ownable
+    modifier onlyVault() {
+        if (msg.sender != vault) revert AaveYieldFarm__OnlyVault();
+        _;
+    }
+
+    modifier whenActive() {
+        if (!active) revert AaveYieldFarm__StrategyInactive();
+        _;
+    }
 
     constructor(address _asset, address _lendingPool, address _aToken, address _vault) Ownable() {
         asset = IERC20(_asset);
@@ -54,12 +63,17 @@ contract AaveYieldFarm is IStrategy {
         emit Deposited(amount, block.timestamp);
     }
 
-    function withdraw(uint256)external override{
-        if(amount == 0) revert AaveYieldFarm__ZeroAmountToWithdraw();
+    function withdraw(uint256 amount) external override onlyVault nonReentrant returns (uint256) {
+        if (amount == 0) revert AaveYieldFarm__ZeroAmount();
 
-        uint256 aTokenBalance = aToken.balanceOf(address(this));
-        lendingPool.withdraw(address(asset), aTokenBalance, vault);
-        
+        uint256 available = balanceOf();
+        if (amount > available) revert AaveYieldFarm__InsufficientBalance();
+
+        // Withdraw from Aave (type(uint256).max withdraws exact amount)
+        uint256 withdrawn = lendingPool.withdraw(address(asset), amount, vault);
+
+        emit Withdrawn(withdrawn, block.timestamp);
+        return withdrawn;
     }
 
 
