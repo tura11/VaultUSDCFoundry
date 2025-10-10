@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.24;
 
-import {VaultUSDC} from "./VaultUSDC.sol";
+import {VaultUSDC} from "../VaultUSDC.sol";
 
 interface IStrategy {
     function deposit(uint256 amount) external returns (uint256);
