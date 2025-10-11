@@ -362,5 +362,20 @@ contract testVaultUSDC is Test {
         assertEq(vault.strategy(), address(newStrategy));
     }
 
+    function testSetStrategyAdrressRevert() public {
+    vm.prank(owner);
+    vm.expectRevert(VaultUSDC.VaultUSDC__NoStrategySet.selector);
+    vault.setStrategy(address(0));
+    }
+
+    function testRebalanceRevertsNoStrategy() public {
+    vm.prank(owner);
+    VaultUSDC vaultNoStrat = new VaultUSDC(usdc);
+    
+
+    vm.expectRevert(VaultUSDC.VaultUSDC__NoStrategySet.selector);
+    vaultNoStrat._rebalanceToStrategy();
+}
+
 
 }

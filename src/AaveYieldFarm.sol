@@ -8,30 +8,27 @@ import {IAaveLendingPool} from "./interfaces/AaveLendingPool.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
-contract AaveYieldFarm is IStrategy, Ownable, ReentrancyGuard { // ✅ DODANE: Ownable, ReentrancyGuard
+contract AaveYieldFarm is IStrategy, Ownable, ReentrancyGuard {
 
     using SafeERC20 for IERC20;
 
-    // ✅ DODANE: Brakujące errory
     error AaveYieldFarm__ZeroDeposit();
     error AaveYieldFarm__ZeroAmount();
     error AaveYieldFarm__InsufficientBalance();
     error AaveYieldFarm__OnlyVault();
     error AaveYieldFarm__StrategyInactive();
-
-    // ✅ DODANE: Brakujące eventy
     event Deposited(uint256 amount, uint256 timestamp);
     event Withdrawn(uint256 amount, uint256 timestamp);
     event Harvested(uint256 profit, uint256 timestamp);
     event EmergencyWithdrawal(uint256 amount, uint256 timestamp);
 
-    IERC20 public immutable assetToken; // ✅ ZMIENIONE: asset -> assetToken (żeby nie kolidowało z function asset())
+    IERC20 public immutable assetToken; 
     IAaveLendingPool public immutable lendingPool;
     address public vault;
     IERC20 public aToken; // aUSDC
     bool public active;
 
-    uint256 public totalDeposited; // ✅ DODANE: Tracking ile zdeponowaliśmy
+    uint256 public totalDeposited; 
 
     modifier onlyVault() {
         if (msg.sender != vault) revert AaveYieldFarm__OnlyVault();
@@ -48,7 +45,7 @@ contract AaveYieldFarm is IStrategy, Ownable, ReentrancyGuard { // ✅ DODANE: O
         address _lendingPool, 
         address _aToken, 
         address _vault
-    ) Ownable(msg.sender) { // ✅ POPRAWIONE: Ownable(msg.sender) w Solidity 0.8.24
+    ) Ownable(msg.sender) { 
         assetToken = IERC20(_asset);
         lendingPool = IAaveLendingPool(_lendingPool);
         aToken = IERC20(_aToken);
@@ -70,11 +67,10 @@ contract AaveYieldFarm is IStrategy, Ownable, ReentrancyGuard { // ✅ DODANE: O
         onlyVault 
         whenActive 
         nonReentrant 
-        returns (uint256) // ✅ POPRAWIONE: Musi zwracać uint256 (IStrategy wymaga)
+        returns (uint256) 
     {
         if(amount == 0) revert AaveYieldFarm__ZeroDeposit();
 
-        // 1. Odbierz USDC od vaulta
         assetToken.safeTransferFrom(vault, address(this), amount);
 
         // 2. Deposit do Aave
@@ -85,7 +81,7 @@ contract AaveYieldFarm is IStrategy, Ownable, ReentrancyGuard { // ✅ DODANE: O
 
         emit Deposited(amount, block.timestamp);
 
-        return amount; // ✅ DODANE: return
+        return amount; 
     }
 
     /**
@@ -104,8 +100,7 @@ contract AaveYieldFarm is IStrategy, Ownable, ReentrancyGuard { // ✅ DODANE: O
 
         uint256 available = balanceOf();
         if (amount > available) revert AaveYieldFarm__InsufficientBalance();
-
-        // Withdraw from Aave bezpośrednio do vaulta
+        // Withdraw from Aave to vault
         uint256 withdrawn = lendingPool.withdraw(address(assetToken), amount, vault);
 
         // Update tracking
