@@ -73,7 +73,7 @@ contract testVaultUSDC is Test {
         vault.deposit(INITIAL_BALANCE, msg.sender);
         uint256 expectedTotalDeposited = 980000e6;
         assertEq(vault.totalDeposited(), expectedTotalDeposited); // after fee
-        assertEq(vault.userTotalDeposited(msg.sender), INITIAL_BALANCE); // its total value of deposited assets with no fee.
+        assertEq(vault.userTotalDeposited(msg.sender), expectedTotalDeposited); // its total value of deposited assets with no fee.
         assertEq(vault.totalUsers(), 1); 
         assertEq(vault.userFirstDepositTime(msg.sender), block.timestamp);
         vm.stopPrank();
@@ -120,7 +120,7 @@ contract testVaultUSDC is Test {
     vault.withdraw(100000e6, user, user);
 
     assertEq(vault.totalDeposited(), 980000e6 - 100000e6);
-    assertEq(vault.userTotalDeposited(user), INITIAL_BALANCE);
+    assertEq(vault.userTotalDeposited(user), 980000e6);
     assertEq(vault.totalUsers(), 1);
     assertEq(vault.userTotalWithdrawn(user), 100000e6);
     vm.stopPrank();
