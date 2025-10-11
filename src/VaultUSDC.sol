@@ -220,7 +220,7 @@ contract VaultUSDC is ERC4626, Ownable, Pausable, ReentrancyGuard {
         }
     }
 
-    function withdrawProfit(address receiver) external nonReentrant whenNotPaused returns(uint256) { 
+    function withdrawProfit(address receiver) external  whenNotPaused returns(uint256) { 
         uint256 userShares = balanceOf(msg.sender);
         if(userShares == 0) {
             revert VaultUSDC__NoShares();

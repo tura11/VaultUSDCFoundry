@@ -1,168 +1,366 @@
 // SPDX-License-Identifier: MIT
-
 pragma solidity 0.8.24;
 
 import {Test, console} from "forge-std/Test.sol";
 import {VaultUSDC} from "../../src/VaultUSDC.sol";
-import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {ERC20Mock} from "@openzeppelin/contracts/mocks/token/ERC20Mock.sol";
-
+import {MockStrategy} from "../mocks/AaveStrategyMock.sol";
 
 contract testVaultUSDC is Test {
+    // Events (kopiujemy z VaultUSDC)
+    event DepositExecuted(
+        address indexed user,
+        address indexed receiver,
+        uint256 assetsDeposited,
+        uint256 sharesReceived,
+        uint256 managementFeeCharged,
+        uint256 timestamp
+    );
+    event WithdrawalExecuted(
+        address indexed user,
+        address indexed receiver,
+        address indexed shareOwner,
+        uint256 assetsWithdrawn,
+        uint256 sharesBurned,
+        uint256 timestamp
+    );
 
-     event DepositExecuted(address indexed user, address indexed receiver, uint256 assetsDeposited, uint256 sharesReceived, uint256 managementFeeCharged, uint256 timestamp);
-     event WithdrawalExecuted(address indexed user, address indexed receiver, address indexed shareOwner, uint256 assetsWithdrawn, uint256 sharesBurned, uint256 timestamp);
-
-
+    MockStrategy strategy;
     ERC20Mock usdc;
     VaultUSDC vault;
     address user;
     address owner;
-    uint256 public constant INITIAL_BALANCE = 1000000e6;
-
+    uint256 public constant INITIAL_BALANCE = 1_000_000e6;
 
     function setUp() public {
         user = makeAddr("user");
         owner = makeAddr("owner");
 
+        // Deploy mock USDC
         usdc = new ERC20Mock();
+        
+        // Mint USDC dla ownera i usera
+        usdc.mint(owner, INITIAL_BALANCE);
         usdc.mint(user, INITIAL_BALANCE);
 
+        // Deploy vault jako owner
         vm.startPrank(owner);
         vault = new VaultUSDC(usdc);
         vm.stopPrank();
 
+        // Deploy strategy
+        strategy = new MockStrategy(address(usdc), address(vault));
+        
+        // Ustaw strategy w vault
+        vm.prank(owner);
+        vault.setStrategy(address(strategy));
     }
 
-    function testConstructor() public {
+    function testConstructor() public view {
         assertEq(vault.name(), "VaultUSDC");
         assertEq(vault.symbol(), "vUSDC");
-        assertEq(vault.maxDepositLimit(), INITIAL_BALANCE);
-        assertEq(vault.maxWithdrawLimit(), 100000e6);
-        assertEq(vault.managementFee(), 200);
+        assertEq(vault.maxDepositLimit(), 1_000_000e6);
+        assertEq(vault.maxWithdrawLimit(), 100_000e6);
+        assertEq(vault.managementFee(), 200); // 2%
         assertEq(vault.totalDeposited(), 0);
+        assertEq(vault.totalUsers(), 0);
     }
 
-
-    function testDepositRevert() public {
+    function testDepositRevertExceedsLimit() public {
         vm.startPrank(user);
+        usdc.approve(address(vault), 10_000_000e6);
+        
         vm.expectRevert(VaultUSDC.VaultUSDC__DepositExceedsLimit.selector);
-        vault.deposit(10000000e6, msg.sender);
+        vault.deposit(10_000_000e6, user);
         vm.stopPrank();
     }
-    function testModifierRevertZeroAmount() public {
+
+    function testDepositRevertZeroAmount() public {
         vm.startPrank(user);
         usdc.approve(address(vault), INITIAL_BALANCE);
+        
         vm.expectRevert(VaultUSDC.VaultUSDC__ZeroAmount.selector);
-        vault.deposit(0, msg.sender);
+        vault.deposit(0, user);
+        vm.stopPrank();
     }
 
-    function testModifierRevertInvalidAddress() public {
+    function testDepositRevertInvalidAddress() public {
         vm.startPrank(user);
         usdc.approve(address(vault), INITIAL_BALANCE);
-        user = address(0);
+        
         vm.expectRevert(VaultUSDC.VaultUSDC__InvalidReceiver.selector);
-        vault.deposit(INITIAL_BALANCE, user);
+        vault.deposit(INITIAL_BALANCE, address(0));
         vm.stopPrank();
     }
 
-
-    function testDepositProperlyAddAssetsAndUsers() public {
-        vm.startPrank(user);
-        usdc.approve(address(vault), INITIAL_BALANCE);
-        vault.deposit(INITIAL_BALANCE, msg.sender);
-        uint256 expectedTotalDeposited = 980000e6;
-        assertEq(vault.totalDeposited(), expectedTotalDeposited); // after fee
-        assertEq(vault.userTotalDeposited(msg.sender), expectedTotalDeposited); // its total value of deposited assets with no fee.
-        assertEq(vault.totalUsers(), 1); 
-        assertEq(vault.userFirstDepositTime(msg.sender), block.timestamp);
-        vm.stopPrank();
-    }
-
- 
-    function testDepositEmitEvent() public {
+    function testDepositSuccess() public {
+        uint256 depositAmount = 100_000e6;
+        uint256 expectedFee = (depositAmount * 200) / 10000; // 2% = 2,000 USDC
+        uint256 expectedAfterFee = depositAmount - expectedFee; // 98,000 USDC
         
         vm.startPrank(user);
-        usdc.approve(address(vault), INITIAL_BALANCE);
+        usdc.approve(address(vault), depositAmount);
+        
+        uint256 sharesMinted = vault.deposit(depositAmount, user);
+        vm.stopPrank();
+
+        // Check shares minted (should equal assetsAfterFee na początku)
+        assertEq(sharesMinted, expectedAfterFee);
+        assertEq(vault.balanceOf(user), expectedAfterFee);
+        
+        // Check tracking variables
+        assertEq(vault.totalDeposited(), expectedAfterFee);
+        assertEq(vault.userCostBasis(user), expectedAfterFee);
+        assertEq(vault.totalUsers(), 1);
+        assertEq(vault.userFirstDepositTime(user), block.timestamp);
+        
+        // Check fee went to owner
+        assertEq(usdc.balanceOf(owner), INITIAL_BALANCE + expectedFee);
+        
+        // Check totalAssets (vault + strategy)
+        // 85% should go to strategy, 15% stay in vault
+        uint256 expectedInStrategy = (expectedAfterFee * 8500) / 10000; // 85%
+        uint256 expectedInVault = expectedAfterFee - expectedInStrategy; // 15%
+        
+        assertApproxEqAbs(vault.totalAssets(), expectedAfterFee, 1); // może być +/-1 wei z zaokrągleniami
+    }
+
+    function testDepositEmitsEvent() public {
+        uint256 depositAmount = 100_000e6;
+        uint256 expectedFee = 2_000e6;
+        uint256 expectedShares = 98_000e6;
+        
+        vm.startPrank(user);
+        usdc.approve(address(vault), depositAmount);
 
         vm.expectEmit(true, true, false, true);
-        emit VaultUSDC.DepositExecuted(
+        emit DepositExecuted(
             user,
             user,
-            INITIAL_BALANCE,
-            980000e6,
-            20000e6,
+            depositAmount,
+            expectedShares,
+            expectedFee,
             block.timestamp
         );
 
-        vault.deposit(INITIAL_BALANCE, user);
+        vault.deposit(depositAmount, user);
         vm.stopPrank();
-
     }
 
-
-    function testWithdrawRevert() public {
+    function testMultipleDeposits() public {
+        // First deposit
         vm.startPrank(user);
-        vm.expectRevert(VaultUSDC.VaultUSDC__WithdrawExceedsLimit.selector);
-        vault.withdraw(10000000e6, user, user);
+        usdc.approve(address(vault), 200_000e6);
+        vault.deposit(100_000e6, user);
+        
+        uint256 firstCostBasis = vault.userCostBasis(user);
+        assertEq(firstCostBasis, 98_000e6);
+        
+        // Second deposit
+        vault.deposit(100_000e6, user);
+        
+        uint256 secondCostBasis = vault.userCostBasis(user);
+        assertEq(secondCostBasis, 98_000e6 + 98_000e6); // costBasis sumuje się
+        assertEq(vault.totalUsers(), 1); // nadal 1 user
         vm.stopPrank();
     }
 
+    function testWithdrawRevertExceedsLimit() public {
+        vm.startPrank(user);
+        usdc.approve(address(vault), INITIAL_BALANCE);
+        vault.deposit(INITIAL_BALANCE, user);
+        
+        vm.expectRevert(VaultUSDC.VaultUSDC__WithdrawExceedsLimit.selector);
+        vault.withdraw(200_000e6, user, user); // Max is 100k
+        vm.stopPrank();
+    }
 
-    function testWithdrawProperlyRemoveAssets() public {
-    vm.startPrank(user);
-    usdc.approve(address(vault), INITIAL_BALANCE);
+    function testWithdrawRevertZeroAmount() public {
+        vm.startPrank(user);
+        usdc.approve(address(vault), INITIAL_BALANCE);
+        vault.deposit(INITIAL_BALANCE, user);
+        
+        vm.expectRevert(VaultUSDC.VaultUSDC__ZeroAmount.selector);
+        vault.withdraw(0, user, user);
+        vm.stopPrank();
+    }
 
-    vault.deposit(INITIAL_BALANCE, user);
+    function testWithdrawSuccess() public {
+        uint256 depositAmount = 200_000e6;
+        uint256 withdrawAmount = 50_000e6;
+        
+        // Deposit first
+        vm.startPrank(user);
+        usdc.approve(address(vault), depositAmount);
+        vault.deposit(depositAmount, user);
+        
+        uint256 sharesBefore = vault.balanceOf(user);
+        uint256 totalDepositedBefore = vault.totalDeposited();
+        
+        // Withdraw
+        uint256 sharesBurned = vault.withdraw(withdrawAmount, user, user);
+        vm.stopPrank();
+        
+        // Check shares burned
+        assertEq(vault.balanceOf(user), sharesBefore - sharesBurned);
+        
+        // Check totalDeposited decreased
+        assertEq(vault.totalDeposited(), totalDepositedBefore - withdrawAmount);
+        
+        // Check user received USDC
+        // User miał: 1M initial - 200k deposit + 50k withdraw = 850k
+        assertEq(usdc.balanceOf(user), INITIAL_BALANCE - depositAmount + withdrawAmount);
+        
+        // Check userTotalWithdrawn tracking
+        assertEq(vault.userTotalWithdrawn(user), withdrawAmount);
+    }
 
-    vault.approve(address(vault), 100000e6);
+    function testWithdrawEmitsEvent() public {
+        uint256 depositAmount = 200_000e6;
+        uint256 withdrawAmount = 50_000e6;
+        
+        vm.startPrank(user);
+        usdc.approve(address(vault), depositAmount);
+        vault.deposit(depositAmount, user);
+        
+        // Calculate expected shares burned
+        uint256 expectedSharesBurned = vault.previewWithdraw(withdrawAmount);
 
-    vault.withdraw(100000e6, user, user);
+        vm.expectEmit(true, true, true, true);
+        emit WithdrawalExecuted(
+            user,
+            user,
+            user,
+            withdrawAmount,
+            expectedSharesBurned,
+            block.timestamp
+        );
 
-    assertEq(vault.totalDeposited(), 980000e6 - 100000e6);
-    assertEq(vault.userTotalDeposited(user), 980000e6);
-    assertEq(vault.totalUsers(), 1);
-    assertEq(vault.userTotalWithdrawn(user), 100000e6);
-    vm.stopPrank();
-}
+        vault.withdraw(withdrawAmount, user, user);
+        vm.stopPrank();
+    }
 
+    function testWithdrawFromStrategy() public {
+        uint256 depositAmount = 200_000e6;
+        
+        // Deposit (85% goes to strategy)
+        vm.startPrank(user);
+        usdc.approve(address(vault), depositAmount);
+        vault.deposit(depositAmount, user);
+        
+        uint256 vaultBalance = usdc.balanceOf(address(vault));
+        
+        // Try to withdraw more than vault has (should pull from strategy)
+        uint256 withdrawAmount = vaultBalance + 10_000e6;
+        
+        vault.withdraw(withdrawAmount, user, user);
+        vm.stopPrank();
+        
+        // Should succeed because strategy has funds
+        assertEq(vault.userTotalWithdrawn(user), withdrawAmount);
+    }
 
+    function testWithdrawProfit() public {
+        uint256 depositAmount = 100_000e6;
+        uint256 expectedAfterFee = 98_000e6;
+        
+        // Deposit
+        vm.startPrank(user);
+        usdc.approve(address(vault), depositAmount);
+        vault.deposit(depositAmount, user);
+        vm.stopPrank();
+        
+        // Simulate yield (mock strategy gives profit)
+        uint256 profit = 5_000e6;
+        usdc.mint(address(strategy), profit);
+        
+        // Now user's shares are worth more
+        uint256 userValue = vault.convertToAssets(vault.balanceOf(user));
+        
+        // withdrawProfit should only withdraw the profit
+        vm.startPrank(user);
+        uint256 profitWithdrawn = vault.withdrawProfit(user);
+        vm.stopPrank();
+        
+        // Check profit withdrawn
+        assertGt(profitWithdrawn, 0);
+        
+        // Cost basis should remain (minus proportional amount)
+        assertLt(vault.userCostBasis(user), expectedAfterFee);
+        assertGt(vault.userCostBasis(user), 0);
+    }
 
+    function testWithdrawProfitNoProfit() public {
+        uint256 depositAmount = 100_000e6;
+        
+        vm.startPrank(user);
+        usdc.approve(address(vault), depositAmount);
+        vault.deposit(depositAmount, user);
+        
+        // No yield, withdrawProfit should return 0
+        uint256 profitWithdrawn = vault.withdrawProfit(user);
+        assertEq(profitWithdrawn, 0);
+        vm.stopPrank();
+    }
 
-function testWithdrawEmitEvent() public {
-    vm.startPrank(user);
-    usdc.approve(address(vault), INITIAL_BALANCE);
+    function testCostBasisTracking() public {
+        uint256 depositAmount = 100_000e6;
+        uint256 expectedAfterFee = 98_000e6;
+        
+        vm.startPrank(user);
+        usdc.approve(address(vault), depositAmount);
+        vault.deposit(depositAmount, user);
+        
+        // Initial cost basis
+        assertEq(vault.userCostBasis(user), expectedAfterFee);
+        
+        // Withdraw half
+        vault.withdraw(49_000e6, user, user);
+        
+        // Cost basis should be reduced proportionally
+        // Burned ~50% shares → cost basis should be ~50% of original
+        assertApproxEqRel(vault.userCostBasis(user), expectedAfterFee / 2, 0.01e18); // 1% tolerance
+        
+        // Withdraw all remaining
+        uint256 remaining = vault.convertToAssets(vault.balanceOf(user));
+        vault.withdraw(remaining, user, user);
+        
+        // Cost basis should be 0
+        assertEq(vault.userCostBasis(user), 0);
+        vm.stopPrank();
+    }
 
-    vault.deposit(INITIAL_BALANCE, user);
+    function testPauseUnpause() public {
+        // Pause
+        vm.prank(owner);
+        vault.pause();
+        
+        // Deposit should revert
+        vm.startPrank(user);
+        usdc.approve(address(vault), 100_000e6);
+        vm.expectRevert();
+        vault.deposit(100_000e6, user);
+        vm.stopPrank();
+        
+        // Unpause
+        vm.prank(owner);
+        vault.unpause();
+        
+        // Now should work
+        vm.startPrank(user);
+        vault.deposit(100_000e6, user);
+        vm.stopPrank();
+    }
 
-    vm.expectEmit(true, true, false, true);
-    emit VaultUSDC.WithdrawalExecuted(
-        user,
-        user,
-        user,
-        100000e6,
-        100000e6,
-        block.timestamp
-    );
-
-    vault.withdraw(100000e6, user, user);
-    vm.stopPrank();
+    function testSetStrategy() public {
+        MockStrategy newStrategy = new MockStrategy(address(usdc), address(vault));
+        
+        vm.prank(owner);
+        vault.setStrategy(address(newStrategy));
+        
+        assertEq(vault.strategy(), address(newStrategy));
     }
 
 
-    
-
-
-
-
-
-
-
-    
-
-
-
-
-  
 }
-
