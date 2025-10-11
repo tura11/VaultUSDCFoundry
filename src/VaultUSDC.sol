@@ -27,6 +27,8 @@ contract VaultUSDC is ERC4626, Ownable, Pausable, ReentrancyGuard {
     error VaultUSDC__NoStrategySet();
     error VaultUSDC__InsufficientStrategyLiquidity(); 
     error VaultUSDC__NoShares();
+    error VaultUSDC__InvalidStrategyAddress();
+
 
     event DepositExecuted(address indexed user, address indexed receiver, uint256 assetsDeposited, uint256 sharesReceived, uint256 managementFeeCharged, uint256 timestamp);
     event WithdrawalExecuted(address indexed user, address indexed receiver, address indexed shareOwner, uint256 assetsWithdrawn, uint256 sharesBurned, uint256 timestamp);
@@ -106,13 +108,15 @@ contract VaultUSDC is ERC4626, Ownable, Pausable, ReentrancyGuard {
 
     function _rebalanceToStrategy() internal {
        
-        if (strategy == address(0)) return;
+        if (strategy == address(0)) {
+            revert VaultUSDC__InvalidStrategyAddress();
+        }
 
         uint256 vaultBalance = IERC20(asset()).balanceOf(address(this));
         uint256 total = totalAssets();
 
         if (total == 0) {
-            return;
+            revert VaultUSDC__NoShares();
         }
 
         uint256 targetLiquidity = (total * TARGET_LIQUIDITY_BPS) / 10000;
