@@ -8,7 +8,6 @@ import {ERC20Mock} from "@openzeppelin/contracts/mocks/token/ERC20Mock.sol";
 import {MockStrategy} from "../mocks/AaveStrategyMock.sol";
 
 contract testVaultUSDC is Test {
-    // Events (kopiujemy z VaultUSDC)
     event DepositExecuted(
         address indexed user,
         address indexed receiver,
@@ -37,22 +36,19 @@ contract testVaultUSDC is Test {
         user = makeAddr("user");
         owner = makeAddr("owner");
 
-        // Deploy mock USDC
         usdc = new ERC20Mock();
         
-        // Mint USDC dla ownera i usera
+
         usdc.mint(owner, INITIAL_BALANCE);
         usdc.mint(user, INITIAL_BALANCE);
 
-        // Deploy vault jako owner
         vm.startPrank(owner);
         vault = new VaultUSDC(usdc);
         vm.stopPrank();
 
-        // Deploy strategy
+
         strategy = new MockStrategy(address(usdc), address(vault));
         
-        // Ustaw strategy w vault
         vm.prank(owner);
         vault.setStrategy(address(strategy));
     }
@@ -215,7 +211,31 @@ contract testVaultUSDC is Test {
         // Check userTotalWithdrawn tracking
         assertEq(vault.userTotalWithdrawn(user), withdrawAmount);
     }
-
+    function testWithdrawWhenTotalDepositedIsLess() public {
+    uint256 depositAmount = 100_000e6;
+    
+   
+    vm.startPrank(user);
+    usdc.approve(address(vault), depositAmount);
+    vault.deposit(depositAmount, user);
+    vm.stopPrank();
+    
+  
+    uint256 totalDepositedBefore = vault.totalDeposited();
+    
+ 
+    deal(address(usdc), address(vault), 200_000e6);
+    
+  
+    uint256 withdrawAmount = 99_000e6; 
+    
+    vm.startPrank(user);
+    vault.withdraw(withdrawAmount, user, user);
+    vm.stopPrank();
+    
+    
+    assertEq(vault.totalDeposited(), 0, "totalDeposited should be 0");
+    }
     function testWithdrawEmitsEvent() public {
         uint256 depositAmount = 200_000e6;
         uint256 withdrawAmount = 50_000e6;
@@ -371,11 +391,59 @@ contract testVaultUSDC is Test {
     function testRebalanceRevertsNoStrategy() public {
     vm.prank(owner);
     VaultUSDC vaultNoStrat = new VaultUSDC(usdc);
-    
-
     vm.expectRevert(VaultUSDC.VaultUSDC__NoStrategySet.selector);
     vaultNoStrat._rebalanceToStrategy();
-}
+    }
+
+
+
+    function testRebalanceRevertsNoAssets() public {
+    vm.startPrank(user);
+    usdc.approve(address(vault), INITIAL_BALANCE);
+    vm.expectRevert(VaultUSDC.VaultUSDC__NoShares.selector);
+    vault._rebalanceToStrategy();
+    }
+
+
+    function testWithdrawWithAllowance() public {
+    uint256 depositAmount = 200_000e6;
+    uint256 withdrawAmount = 50_000e6;
+    
+  
+    vm.startPrank(user);
+    usdc.approve(address(vault), depositAmount);
+    vault.deposit(depositAmount, user);
+    vm.stopPrank();
+    
+  
+    address spender = owner;
+    uint256 sharesToApprove = vault.previewWithdraw(withdrawAmount);
+    
+    vm.prank(user);
+    vault.approve(spender, sharesToApprove);
+    
+    
+    assertEq(vault.allowance(user, spender), sharesToApprove);
+    
+    
+    uint256 ownerBalanceBefore = usdc.balanceOf(owner);
+    
+    
+    vm.prank(spender);
+    vault.withdraw(withdrawAmount, spender, user);
+    
+    
+    assertEq(vault.allowance(user, spender), 0);
+    
+ 
+    assertEq(usdc.balanceOf(owner), ownerBalanceBefore + withdrawAmount);
+    
+ 
+    uint256 expectedRemainingShares = 196_000e6 - sharesToApprove;
+    assertEq(vault.balanceOf(user), expectedRemainingShares);
+    }
+
+    
 
 
 }
