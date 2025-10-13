@@ -545,4 +545,14 @@ contract testVaultUSDC is Test {
     uint256 vaultBalance = usdc.balanceOf(address(vault));
     assertGt(vaultBalance, 0, "Vault should have funds after emergency withdraw");
     }
+
+    function testGetUserBalance() public {
+        uint256 amountToDeposit = 1000;
+        uint256 expectedAmountAfterFees = 980;
+        vm.startPrank(user);
+        usdc.approve(address(vault), amountToDeposit);
+        vault.deposit(amountToDeposit, user);
+        vm.stopPrank();
+        assertEq(vault.getUserBalance(user), expectedAmountAfterFees);
+    }
 }
