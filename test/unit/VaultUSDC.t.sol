@@ -443,6 +443,15 @@ contract testVaultUSDC is Test {
     assertEq(vault.balanceOf(user), expectedRemainingShares);
     }
 
+    function testWithdrawFromStrategyReverts() public {
+    vm.prank(owner);
+    vault.clearStrategy();
+    
+    uint256 withdrawAmount = 1000;
+    
+    vm.expectRevert(VaultUSDC.VaultUSDC__NoStrategySet.selector);
+    vault._withdrawFromStrategy(withdrawAmount);
+    }
     
 
 
