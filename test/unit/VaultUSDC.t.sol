@@ -555,4 +555,47 @@ contract testVaultUSDC is Test {
         vm.stopPrank();
         assertEq(vault.getUserBalance(user), expectedAmountAfterFees);
     }
+
+
+    function testGetUserInfo() public {
+    uint256 depositAmount = 1000;
+    uint256 withdrawAmount = 100;
+    
+    // Zapisz timestamp przed depositem
+    uint256 depositTime = block.timestamp;
+    
+    // User deposituje
+    vm.startPrank(user);
+    usdc.approve(address(vault), depositAmount);
+    vault.deposit(depositAmount, user); // 1000 - 2% fee = 980 shares
+    
+    // User wypłaca
+    vault.withdraw(withdrawAmount, user, user);
+    vm.stopPrank();
+    
+    // Pobierz informacje o userze
+    (
+        uint256 totalShares,
+        uint256 totalAssets,
+        uint256 totalDeposits,
+        uint256 totalWithdrawals,
+        uint256 firstDepositTime
+    ) = vault.getUserInfo(user);
+    
+    // 1. Shares: 980 (po deposit) - ~102 (shares burned za 100 withdrawal) ≈ 878
+    uint256 expectedShares = 980 - vault.previewWithdraw(withdrawAmount);
+    assertEq(totalShares, expectedShares, "Wrong shares");
+    
+    
+    assertEq(totalAssets, vault.convertToAssets(totalShares), "Wrong assets");
+    
+    
+    assertEq(totalDeposits, 980, "Wrong total deposits");
+    
+    
+    assertEq(totalWithdrawals, withdrawAmount, "Wrong total withdrawals");
+    
+
+    assertEq(firstDepositTime, depositTime, "Wrong first deposit time");
+    }
 }
