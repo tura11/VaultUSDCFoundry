@@ -6,6 +6,7 @@ import {VaultUSDC} from "../../src/VaultUSDC.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {ERC20Mock} from "@openzeppelin/contracts/mocks/token/ERC20Mock.sol";
 import {MockStrategy} from "../mocks/AaveStrategyMock.sol";
+import {IStrategy} from "../../src/interfaces/IStrategy.sol";
 
 contract testVaultUSDC is Test {
     event DepositExecuted(
@@ -452,7 +453,96 @@ contract testVaultUSDC is Test {
     vm.expectRevert(VaultUSDC.VaultUSDC__NoStrategySet.selector);
     vault._withdrawFromStrategy(withdrawAmount);
     }
+
+
+    function testWithdrawFromStrategyRevertsInsufficientStrategyLiquidity() public {
+    // 1. Setup - user deposituje do vault
+    vm.startPrank(user);
+    usdc.approve(address(vault), INITIAL_BALANCE);
+    vault.deposit(INITIAL_BALANCE, user);
+    vm.stopPrank();
     
+    // 2. Owner ustawia strategię
+    MockStrategy newStrategy = new MockStrategy(address(usdc), address(vault));
+    vm.prank(owner);
+    vault.setStrategy(address(newStrategy));
+    
+    // 3. Vault wysyła część środków do strategii
+    vm.prank(owner);
+    vault.rebalance(); // to wyśle środki do strategii
+    
+    // 4. Mock zwraca MNIEJ niż requested
+    uint256 requestedAmount = 1_000_000e6;
+    uint256 returnedAmount = 100e6; // za mało!
+    
+    vm.mockCall(
+        address(newStrategy),
+        abi.encodeWithSelector(IStrategy.withdraw.selector, requestedAmount),
+        abi.encode(returnedAmount)
+    );
+    
+    // 5. Oczekuj revert InsufficientStrategyLiquidity
+    vm.expectRevert(VaultUSDC.VaultUSDC__InsufficientStrategyLiquidity.selector);
+    vault._withdrawFromStrategy(requestedAmount);
+    }
 
+    function testCheckAndRebalanceRevertsNoStrategy() public {
+        vm.prank(owner);
+        VaultUSDC vaultNoStrat = new VaultUSDC(usdc);
+        vm.expectRevert(VaultUSDC.VaultUSDC__NoStrategySet.selector);
+        vaultNoStrat._checkAndRebalanceFromStrategy();
+    }
 
+    function testWithdrawProfitRevertsNoShares() public {
+        vm.prank(user);
+        usdc.approve(address(vault), INITIAL_BALANCE);
+        vm.expectRevert(VaultUSDC.VaultUSDC__NoShares.selector);
+        vault.withdrawProfit(user);
+    }
+    function testUpdateTargetLiquiditySuccess() public {
+        uint256 oldTarget = vault.targetLiquidityBPS(); // 1500 (default)
+        uint256 newTarget = 2000;
+        
+        
+        vm.prank(owner);
+        vault.updateTargetLiquidity(newTarget);
+        
+        assertEq(vault.targetLiquidityBPS(), newTarget);
+    }
+
+    function testUpdateTargetLiquidityRevertsTooHigh() public {
+        vm.prank(owner);
+        vm.expectRevert("Max 50%");
+        vault.updateTargetLiquidity(5001);
+    }
+
+    function testUpdateTargetLiquidityRevertsTooLow() public {
+        vm.prank(owner);
+        vm.expectRevert("Min 5%");
+        vault.updateTargetLiquidity(499);
+    }
+
+    function testUpdateTargetLiquidityRevertsNotOwner() public {
+        vm.prank(user);
+        vm.expectRevert(); // OwnableUnauthorizedAccount
+        vault.updateTargetLiquidity(2000);
+    }
+
+    function testEmergencyWithdraw() public {
+    vm.startPrank(owner); // ✅ Owner od samego początku
+    
+    // Wszystko jako owner
+    MockStrategy newStrategy = new MockStrategy(address(usdc), address(vault));
+    vault.setStrategy(address(newStrategy));
+    usdc.approve(address(vault), INITIAL_BALANCE);
+    vault.deposit(INITIAL_BALANCE, owner);
+    vault.rebalance();
+    vault.pause();
+    vault.emergencyWithdrawFromStrategy();
+    
+    vm.stopPrank();
+    
+    uint256 vaultBalance = usdc.balanceOf(address(vault));
+    assertGt(vaultBalance, 0, "Vault should have funds after emergency withdraw");
+    }
 }

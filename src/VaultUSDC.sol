@@ -40,8 +40,9 @@ contract VaultUSDC is ERC4626, Ownable, Pausable, ReentrancyGuard {
     uint256 public totalDeposited;
     uint256 public totalFeesCollected;
     uint256 public totalUsers;
-    
-    uint256 public constant TARGET_LIQUIDITY_BPS = 1500; // 15%
+    uint256 public targetLiquidityBPS = 1500; // 15%
+
+
     uint256 public constant REBALANCE_THRESHOLD_BPS = 500; // 5%
 
    
@@ -118,7 +119,7 @@ contract VaultUSDC is ERC4626, Ownable, Pausable, ReentrancyGuard {
             revert VaultUSDC__NoShares();
         }
 
-        uint256 targetLiquidity = (total * TARGET_LIQUIDITY_BPS) / 10000;
+        uint256 targetLiquidity = (total * targetLiquidityBPS) / 10000;
 
         if(vaultBalance > targetLiquidity) {
             uint256 toSend = vaultBalance - targetLiquidity;
@@ -182,7 +183,7 @@ contract VaultUSDC is ERC4626, Ownable, Pausable, ReentrancyGuard {
         }
     } 
 
-    function _checkAndRebalanceFromStrategy() internal {
+    function _checkAndRebalanceFromStrategy() public {
         if (strategy == address(0)) {
             revert VaultUSDC__NoStrategySet();
         }
@@ -194,10 +195,10 @@ contract VaultUSDC is ERC4626, Ownable, Pausable, ReentrancyGuard {
         if (total == 0) return;
         
         uint256 currentRatio = (vaultBalance * 10000) / total;
-        uint256 minRatio = TARGET_LIQUIDITY_BPS - REBALANCE_THRESHOLD_BPS; // 10%
+        uint256 minRatio = targetLiquidityBPS - REBALANCE_THRESHOLD_BPS; // 10%
         
         if (currentRatio < minRatio) {
-            uint256 targetAmount = (total * TARGET_LIQUIDITY_BPS) / 10000;
+            uint256 targetAmount = (total * targetLiquidityBPS) / 10000;
             uint256 toWithdraw = targetAmount - vaultBalance;
             
             if (toWithdraw > 0) {
@@ -222,7 +223,7 @@ contract VaultUSDC is ERC4626, Ownable, Pausable, ReentrancyGuard {
         }
     }
 
-    function withdrawProfit(address receiver) external  whenNotPaused returns(uint256) { 
+    function withdrawProfit(address receiver) public  whenNotPaused returns(uint256) { 
         uint256 userShares = balanceOf(msg.sender);
         if(userShares == 0) {
             revert VaultUSDC__NoShares();
@@ -256,10 +257,12 @@ contract VaultUSDC is ERC4626, Ownable, Pausable, ReentrancyGuard {
     }
 
     function updateTargetLiquidity(uint256 newTargetBPS) external onlyOwner {
-        require(newTargetBPS <= 5000, "Max 50%");
-        require(newTargetBPS >= 500, "Min 5%");
-        
-
+    require(newTargetBPS <= 5000, "Max 50%");
+    require(newTargetBPS >= 500, "Min 5%");
+    
+    uint256 oldTarget = targetLiquidityBPS; 
+    targetLiquidityBPS = newTargetBPS;      
+    
     }
 
     function emergencyWithdrawFromStrategy() external onlyOwner whenPaused {
