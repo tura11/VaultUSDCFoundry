@@ -598,4 +598,28 @@ contract testVaultUSDC is Test {
 
     assertEq(firstDepositTime, depositTime, "Wrong first deposit time");
     }
+
+    function testGetVaultStats() public {
+        uint256 expetctedAmountAfterFees = 980000e6;
+        vm.startPrank(user);
+        usdc.approve(address(vault), INITIAL_BALANCE);
+        vault.deposit(INITIAL_BALANCE, user);
+        vm.stopPrank();
+        
+        (
+            uint256 totalValueLocked,
+            uint256 activeUsers,
+            uint256 feesCollected,
+            uint256 currentMaxDeposit,
+            uint256 currentMaxWithdraw,
+            uint256 currentManagementFee
+        ) = vault.getVaultStats();
+        
+        assertEq(currentManagementFee, 200);
+        assertEq(currentMaxDeposit, INITIAL_BALANCE);
+        assertEq(currentMaxWithdraw, 100000e6);
+        assertEq(totalValueLocked, expetctedAmountAfterFees);
+        assertEq(activeUsers, 1);
+        assertEq(feesCollected, 20000e6);
+    }
 }
