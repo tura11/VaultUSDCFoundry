@@ -1,5 +1,5 @@
 Compiling 44 files with Solc 0.8.24
-Solc 0.8.24 finished in 2.99s
+Solc 0.8.24 finished in 3.18s
 Compiler run successful with warnings:
 Warning (2519): This declaration shadows an existing declaration.
    --> src/VaultUSDC.sol:289:84:
@@ -25,27 +25,27 @@ Warning (2072): Unused local variable.
     |         ^^^^^^^^^^^^^^^^^^^
 
 Warning (2072): Unused local variable.
-   --> test/unit/VaultUSDC.t.sol:121:9:
+   --> test/unit/VaultUSDC.t.sol:135:9:
     |
-121 |         uint256 expectedInVault = expectedAfterFee - expectedInStrategy; // 15%
+135 |         uint256 expectedInVault = expectedAfterFee - expectedInStrategy; // 15%
     |         ^^^^^^^^^^^^^^^^^^^^^^^
 
 Warning (2072): Unused local variable.
-   --> test/unit/VaultUSDC.t.sol:225:5:
+   --> test/unit/VaultUSDC.t.sol:239:5:
     |
-225 |     uint256 totalDepositedBefore = vault.totalDeposited();
+239 |     uint256 totalDepositedBefore = vault.totalDeposited();
     |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Warning (2072): Unused local variable.
-   --> test/unit/VaultUSDC.t.sol:300:9:
+   --> test/unit/VaultUSDC.t.sol:314:9:
     |
-300 |         uint256 userValue = vault.convertToAssets(vault.balanceOf(user));
+314 |         uint256 userValue = vault.convertToAssets(vault.balanceOf(user));
     |         ^^^^^^^^^^^^^^^^^
 
 Warning (2072): Unused local variable.
-   --> test/unit/VaultUSDC.t.sol:503:9:
+   --> test/unit/VaultUSDC.t.sol:517:9:
     |
-503 |         uint256 oldTarget = vault.targetLiquidityBPS(); // 1500 (default)
+517 |         uint256 oldTarget = vault.targetLiquidityBPS(); // 1500 (default)
     |         ^^^^^^^^^^^^^^^^^
 
 Warning (2018): Function state mutability can be restricted to pure
@@ -57,44 +57,60 @@ Warning (2018): Function state mutability can be restricted to pure
 Analysing contracts...
 Running tests...
 
-Ran 34 tests for test/unit/VaultUSDC.t.sol:testVaultUSDC
-[PASS] testCheckAndRebalanceRevertsNoStrategy() (gas: 3897095)
-[PASS] testConstructor() (gas: 35513)
-[PASS] testCostBasisTracking() (gas: 424368)
-[PASS] testDepositEmitsEvent() (gas: 344166)
-[PASS] testDepositRevertExceedsLimit() (gas: 53995)
-[PASS] testDepositRevertInvalidAddress() (gas: 51591)
-[PASS] testDepositRevertZeroAmount() (gas: 51817)
-[PASS] testDepositSuccess() (gas: 359880)
-[PASS] testEmergencyWithdraw() (gas: 994093)
-[PASS] testGetUserBalance() (gas: 341992)
+Ran 50 tests for test/unit/VaultUSDC.t.sol:testVaultUSDC
+[PASS] testCanDepositRevertsExceedsLimit_View() (gas: 15953)
+[PASS] testCanDepositRevertsInvalidUser() (gas: 13806)
+[PASS] testCanDepositRevertsWhenPaused() (gas: 24610)
+[PASS] testCanDepositRevertsZeroAmount() (gas: 13782)
+[PASS] testCanDepositSuccess() (gas: 12896)
+[PASS] testCanWithdrawBelowLimit() (gas: 350905)
+[PASS] testCanWithdrawRevertWithdrawExceedsLimit() (gas: 340181)
+[PASS] testCanWithdrawRevertsInsufficientBalance() (gas: 351402)
+[PASS] testCanWithdrawRevertsWhenPaused() (gas: 353726)
+[PASS] testCanWithdrawRevertsZeroAmount() (gas: 13826)
+[PASS] testCanWithdrawSuccess() (gas: 350886)
+[PASS] testCheckAndRebalanceRevertsNoStrategy() (gas: 3897073)
+[PASS] testConstructor() (gas: 35558)
+[PASS] testCostBasisTracking() (gas: 424350)
+[PASS] testDepositEmitsEvent() (gas: 344211)
+[PASS] testDepositRevertExceedsLimit() (gas: 54084)
+[PASS] testDepositRevertInvalidAddress() (gas: 51549)
+[PASS] testDepositRevertZeroAmount() (gas: 51795)
+[PASS] testDepositSuccess() (gas: 359792)
+[PASS] testEmergencyWithdraw() (gas: 994116)
+[PASS] testEmergencyWithdrawRevertsNotPaused() (gas: 13461)
+[PASS] testEmergencyWithdrawSuccess() (gas: 352760)
+[PASS] testGetUserBalance() (gas: 342059)
 [PASS] testGetUserInfo() (gas: 430389)
 [PASS] testGetVaultStats() (gas: 345181)
-[PASS] testMultipleDeposits() (gas: 396553)
-[PASS] testPauseUnpause() (gas: 363904)
+[PASS] testMultipleDeposits() (gas: 396531)
+[PASS] testPauseAndUnpause() (gas: 373393)
+[PASS] testPauseUnpause() (gas: 363882)
 [PASS] testRebalanceRevertsNoAssets() (gas: 56712)
-[PASS] testRebalanceRevertsNoStrategy() (gas: 3897071)
+[PASS] testRebalanceRevertsNoStrategy() (gas: 3897027)
 [PASS] testSetStrategy() (gas: 711751)
-[PASS] testSetStrategyAdrressRevert() (gas: 13905)
+[PASS] testSetStrategyAdrressRevert() (gas: 13950)
 [PASS] testUpdateTargetLiquidityRevertsNotOwner() (gas: 14006)
-[PASS] testUpdateTargetLiquidityRevertsTooHigh() (gas: 14217)
-[PASS] testUpdateTargetLiquidityRevertsTooLow() (gas: 14264)
-[PASS] testUpdateTargetLiquiditySuccess() (gas: 20598)
-[PASS] testWithdrawEmitsEvent() (gas: 425070)
-[PASS] testWithdrawFromStrategy() (gas: 417099)
+[PASS] testUpdateTargetLiquidityRevertsTooHigh() (gas: 14262)
+[PASS] testUpdateTargetLiquidityRevertsTooLow() (gas: 14309)
+[PASS] testUpdateTargetLiquiditySuccess() (gas: 20686)
+[PASS] testUpdateVaultParametersRevertsFeeExceeds10Percent() (gas: 15044)
+[PASS] testUpdateVaultParametersSuccess() (gas: 42749)
+[PASS] testWithdrawEmitsEvent() (gas: 425115)
+[PASS] testWithdrawFromStrategy() (gas: 417144)
 [PASS] testWithdrawFromStrategyReverts() (gas: 15200)
-[PASS] testWithdrawFromStrategyRevertsInsufficientStrategyLiquidity() (gas: 1103507)
-[PASS] testWithdrawProfit() (gas: 436515)
-[PASS] testWithdrawProfitNoProfit() (gas: 348799)
-[PASS] testWithdrawProfitRevertsNoShares() (gas: 47369)
+[PASS] testWithdrawFromStrategyRevertsInsufficientStrategyLiquidity() (gas: 1103552)
+[PASS] testWithdrawProfit() (gas: 436493)
+[PASS] testWithdrawProfitNoProfit() (gas: 348777)
+[PASS] testWithdrawProfitRevertsNoShares() (gas: 47325)
 [PASS] testWithdrawRevertExceedsLimit() (gas: 344591)
-[PASS] testWithdrawRevertZeroAmount() (gas: 342404)
-[PASS] testWithdrawSuccess() (gas: 424047)
+[PASS] testWithdrawRevertZeroAmount() (gas: 342449)
+[PASS] testWithdrawSuccess() (gas: 424025)
 [PASS] testWithdrawWhenTotalDepositedIsLess() (gas: 563005)
-[PASS] testWithdrawWithAllowance() (gas: 442037)
-Suite result: ok. 34 passed; 0 failed; 0 skipped; finished in 6.33ms (32.48ms CPU time)
+[PASS] testWithdrawWithAllowance() (gas: 442082)
+Suite result: ok. 50 passed; 0 failed; 0 skipped; finished in 5.38ms (28.84ms CPU time)
 
-Ran 1 test suite in 12.98ms (6.33ms CPU time): 34 tests passed, 0 failed, 0 skipped (34 total tests)
+Ran 1 test suite in 11.96ms (5.38ms CPU time): 50 tests passed, 0 failed, 0 skipped (50 total tests)
 Uncovered for src/AaveYieldFarm.sol:
 - Line (location: source ID 38, lines 33..37, bytes 1246..1353, hits: 0)
 - Function "onlyVault" (location: source ID 38, lines 33..37, bytes 1246..1353, hits: 0)
@@ -232,79 +248,6 @@ Uncovered for src/AaveYieldFarm.sol:
 - Statement (location: source ID 38, lines 209..210, bytes 5659..5676, hits: 0)
 
 Uncovered for src/VaultUSDC.sol:
-- Line (location: source ID 39, lines 306..320, bytes 10446..10876, hits: 0)
-- Function "canDeposit" (location: source ID 39, lines 306..320, bytes 10446..10876, hits: 0)
-- Line (location: source ID 39, lines 307..308, bytes 10524..10532, hits: 0)
-- Statement (location: source ID 39, lines 307..308, bytes 10524..10532, hits: 0)
-- Branch (branch: 27, path: 0) (location: source ID 39, lines 307..310, bytes 10534..10590, hits: 0)
-- Line (location: source ID 39, lines 308..309, bytes 10548..10579, hits: 0)
-- Statement (location: source ID 39, lines 308..309, bytes 10548..10579, hits: 0)
-- Line (location: source ID 39, lines 310..311, bytes 10603..10614, hits: 0)
-- Statement (location: source ID 39, lines 310..311, bytes 10603..10614, hits: 0)
-- Branch (branch: 28, path: 0) (location: source ID 39, lines 310..313, bytes 10616..10671, hits: 0)
-- Line (location: source ID 39, lines 311..312, bytes 10630..10660, hits: 0)
-- Statement (location: source ID 39, lines 311..312, bytes 10630..10660, hits: 0)
-- Line (location: source ID 39, lines 313..314, bytes 10684..10708, hits: 0)
-- Statement (location: source ID 39, lines 313..314, bytes 10684..10708, hits: 0)
-- Branch (branch: 29, path: 0) (location: source ID 39, lines 313..316, bytes 10710..10774, hits: 0)
-- Line (location: source ID 39, lines 314..315, bytes 10724..10763, hits: 0)
-- Statement (location: source ID 39, lines 314..315, bytes 10724..10763, hits: 0)
-- Line (location: source ID 39, lines 316..317, bytes 10787..10805, hits: 0)
-- Statement (location: source ID 39, lines 316..317, bytes 10787..10805, hits: 0)
-- Branch (branch: 30, path: 0) (location: source ID 39, lines 316..319, bytes 10807..10870, hits: 0)
-- Line (location: source ID 39, lines 317..318, bytes 10821..10859, hits: 0)
-- Statement (location: source ID 39, lines 317..318, bytes 10821..10859, hits: 0)
-- Line (location: source ID 39, lines 321..336, bytes 10882..11380, hits: 0)
-- Function "canWithdraw" (location: source ID 39, lines 321..336, bytes 10882..11380, hits: 0)
-- Line (location: source ID 39, lines 322..323, bytes 10961..10969, hits: 0)
-- Statement (location: source ID 39, lines 322..323, bytes 10961..10969, hits: 0)
-- Branch (branch: 31, path: 0) (location: source ID 39, lines 322..325, bytes 10971..11027, hits: 0)
-- Line (location: source ID 39, lines 323..324, bytes 10985..11016, hits: 0)
-- Statement (location: source ID 39, lines 323..324, bytes 10985..11016, hits: 0)
-- Line (location: source ID 39, lines 325..326, bytes 11040..11051, hits: 0)
-- Statement (location: source ID 39, lines 325..326, bytes 11040..11051, hits: 0)
-- Branch (branch: 32, path: 0) (location: source ID 39, lines 325..328, bytes 11053..11108, hits: 0)
-- Line (location: source ID 39, lines 326..327, bytes 11067..11097, hits: 0)
-- Statement (location: source ID 39, lines 326..327, bytes 11067..11097, hits: 0)
-- Line (location: source ID 39, lines 328..329, bytes 11121..11146, hits: 0)
-- Statement (location: source ID 39, lines 328..329, bytes 11121..11146, hits: 0)
-- Branch (branch: 33, path: 0) (location: source ID 39, lines 328..331, bytes 11148..11213, hits: 0)
-- Line (location: source ID 39, lines 329..330, bytes 11162..11202, hits: 0)
-- Statement (location: source ID 39, lines 329..330, bytes 11162..11202, hits: 0)
-- Line (location: source ID 39, lines 331..332, bytes 11222..11275, hits: 0)
-- Statement (location: source ID 39, lines 331..332, bytes 11222..11275, hits: 0)
-- Statement (location: source ID 39, lines 331..332, bytes 11243..11275, hits: 0)
-- Line (location: source ID 39, lines 332..333, bytes 11289..11308, hits: 0)
-- Statement (location: source ID 39, lines 332..333, bytes 11289..11308, hits: 0)
-- Branch (branch: 34, path: 0) (location: source ID 39, lines 332..335, bytes 11310..11374, hits: 0)
-- Line (location: source ID 39, lines 333..334, bytes 11324..11363, hits: 0)
-- Statement (location: source ID 39, lines 333..334, bytes 11324..11363, hits: 0)
-- Line (location: source ID 39, lines 337..346, bytes 11386..11836, hits: 0)
-- Function "updateVaultParameters" (location: source ID 39, lines 337..346, bytes 11386..11836, hits: 0)
-- Line (location: source ID 39, lines 338..339, bytes 11513..11569, hits: 0)
-- Statement (location: source ID 39, lines 338..339, bytes 11513..11569, hits: 0)
-- Branch (branch: 35, path: 0) (location: source ID 39, lines 338..339, bytes 11513..11569, hits: 0)
-- Branch (branch: 35, path: 1) (location: source ID 39, lines 338..339, bytes 11513..11569, hits: 0)
-- Line (location: source ID 39, lines 340..341, bytes 11588..11708, hits: 0)
-- Statement (location: source ID 39, lines 340..341, bytes 11588..11708, hits: 0)
-- Line (location: source ID 39, lines 342..343, bytes 11719..11748, hits: 0)
-- Statement (location: source ID 39, lines 342..343, bytes 11719..11748, hits: 0)
-- Line (location: source ID 39, lines 343..344, bytes 11758..11789, hits: 0)
-- Statement (location: source ID 39, lines 343..344, bytes 11758..11789, hits: 0)
-- Line (location: source ID 39, lines 344..345, bytes 11799..11829, hits: 0)
-- Statement (location: source ID 39, lines 344..345, bytes 11799..11829, hits: 0)
-- Line (location: source ID 39, lines 357..364, bytes 12120..12436, hits: 0)
-- Function "emergencyWithdraw" (location: source ID 39, lines 357..364, bytes 12120..12436, hits: 0)
-- Line (location: source ID 39, lines 358..359, bytes 12189..12247, hits: 0)
-- Statement (location: source ID 39, lines 358..359, bytes 12189..12247, hits: 0)
-- Statement (location: source ID 39, lines 358..359, bytes 12207..12247, hits: 0)
-- Line (location: source ID 39, lines 359..360, bytes 12261..12272, hits: 0)
-- Statement (location: source ID 39, lines 359..360, bytes 12261..12272, hits: 0)
-- Branch (branch: 36, path: 0) (location: source ID 39, lines 359..363, bytes 12274..12430, hits: 0)
-- Line (location: source ID 39, lines 360..361, bytes 12288..12334, hits: 0)
-- Statement (location: source ID 39, lines 360..361, bytes 12288..12334, hits: 0)
-- Line (location: source ID 39, lines 361..362, bytes 12348..12419, hits: 0)
-- Statement (location: source ID 39, lines 361..362, bytes 12348..12419, hits: 0)
 
 Uncovered for test/mocks/AaveStrategyMock.sol:
 - Branch (branch: 0, path: 0) (location: source ID 42, lines 27..28, bytes 750..792, hits: 0)
@@ -329,95 +272,71 @@ Uncovered for test/mocks/AaveStrategyMock.sol:
 - Line (location: source ID 42, lines 105..106, bytes 2918..2942, hits: 0)
 - Statement (location: source ID 42, lines 105..106, bytes 2918..2942, hits: 0)
 
-Anchors for Contract "IERC1155Errors" (solc 0.8.24, source ID 24):
-
-Anchors for Contract "Ownable" (solc 0.8.24, source ID 19):
-
-Anchors for Contract "IMulticall3" (solc 0.8.24, source ID 17):
-
-Anchors for Contract "StdCheats" (solc 0.8.24, source ID 3):
-
-Anchors for Contract "Test" (solc 0.8.24, source ID 13):
-
-Anchors for Contract "stdJson" (solc 0.8.24, source ID 7):
-
-Anchors for Contract "StdConstants" (solc 0.8.24, source ID 4):
-
-Anchors for Contract "ERC4626" (solc 0.8.24, source ID 28):
-
-Anchors for Contract "IERC20Errors" (solc 0.8.24, source ID 24):
-
-Anchors for Contract "TestBase" (solc 0.8.24, source ID 0):
-
-Anchors for Contract "StdChains" (solc 0.8.24, source ID 2):
-
-Anchors for Contract "StdStyle" (solc 0.8.24, source ID 10):
-
-Anchors for Contract "StdAssertions" (solc 0.8.24, source ID 1):
+Anchors for Contract "StdInvariant" (solc 0.8.24, source ID 6):
 
 Anchors for Contract "VmSafe" (solc 0.8.24, source ID 14):
 
 Anchors for Contract "MockStrategy" (solc 0.8.24, source ID 42):
 - IC 5 -> Item 547
 - Runtime code
-  - Refers to item: Line (location: source ID 42, lines 17..22, bytes 462..597, hits: 37)
+  - Refers to item: Line (location: source ID 42, lines 17..22, bytes 462..597, hits: 53)
 - IC 5 -> Item 548
 - Runtime code
-  - Refers to item: Function "constructor" (location: source ID 42, lines 17..22, bytes 462..597, hits: 37)
+  - Refers to item: Function "constructor" (location: source ID 42, lines 17..22, bytes 462..597, hits: 53)
 - IC 50 -> Item 549
 - Runtime code
-  - Refers to item: Line (location: source ID 42, lines 18..19, bytes 516..543, hits: 37)
+  - Refers to item: Line (location: source ID 42, lines 18..19, bytes 516..543, hits: 53)
 - IC 50 -> Item 550
 - Runtime code
-  - Refers to item: Statement (location: source ID 42, lines 18..19, bytes 516..543, hits: 37)
+  - Refers to item: Statement (location: source ID 42, lines 18..19, bytes 516..543, hits: 53)
 - IC 102 -> Item 551
 - Runtime code
-  - Refers to item: Line (location: source ID 42, lines 19..20, bytes 553..567, hits: 37)
+  - Refers to item: Line (location: source ID 42, lines 19..20, bytes 553..567, hits: 53)
 - IC 102 -> Item 552
 - Runtime code
-  - Refers to item: Statement (location: source ID 42, lines 19..20, bytes 553..567, hits: 37)
+  - Refers to item: Statement (location: source ID 42, lines 19..20, bytes 553..567, hits: 53)
 - IC 154 -> Item 553
 - Runtime code
-  - Refers to item: Line (location: source ID 42, lines 20..21, bytes 577..590, hits: 37)
+  - Refers to item: Line (location: source ID 42, lines 20..21, bytes 577..590, hits: 53)
 - IC 154 -> Item 554
 - Runtime code
-  - Refers to item: Statement (location: source ID 42, lines 20..21, bytes 577..590, hits: 37)
+  - Refers to item: Statement (location: source ID 42, lines 20..21, bytes 577..590, hits: 53)
 - IC 410 -> Item 555
 - Creation code
-  - Refers to item: Line (location: source ID 42, lines 26..35, bytes 671..987, hits: 21)
+  - Refers to item: Line (location: source ID 42, lines 26..35, bytes 671..987, hits: 28)
 - IC 410 -> Item 556
 - Creation code
-  - Refers to item: Function "deposit" (location: source ID 42, lines 26..35, bytes 671..987, hits: 21)
+  - Refers to item: Function "deposit" (location: source ID 42, lines 26..35, bytes 671..987, hits: 28)
 - IC 1391 -> Item 557
 - Creation code
-  - Refers to item: Line (location: source ID 42, lines 27..28, bytes 750..792, hits: 21)
+  - Refers to item: Line (location: source ID 42, lines 27..28, bytes 750..792, hits: 28)
 - IC 1391 -> Item 558
 - Creation code
-  - Refers to item: Statement (location: source ID 42, lines 27..28, bytes 750..792, hits: 21)
+  - Refers to item: Statement (location: source ID 42, lines 27..28, bytes 750..792, hits: 28)
 - IC 1474 -> Item 559
 - Creation code
   - Refers to item: Branch (branch: 0, path: 0) (location: source ID 42, lines 27..28, bytes 750..792, hits: 0)
 - IC 1532 -> Item 560
 - Creation code
-  - Refers to item: Branch (branch: 0, path: 1) (location: source ID 42, lines 27..28, bytes 750..792, hits: 21)
+  - Refers to item: Branch (branch: 0, path: 1) (location: source ID 42, lines 27..28, bytes 750..792, hits: 28)
 - IC 1533 -> Item 561
 - Creation code
-  - Refers to item: Line (location: source ID 42, lines 30..31, bytes 861..914, hits: 21)
+  - Refers to item: Line (location: source ID 42, lines 30..31, bytes 861..914, hits: 28)
 - IC 1533 -> Item 562
 - Creation code
-  - Refers to item: Statement (location: source ID 42, lines 30..31, bytes 861..914, hits: 21)
+  - Refers to item: Statement (location: source ID 42, lines 30..31, bytes 861..914, hits: 28)
 - IC 1723 -> Item 563
 - Creation code
-  - Refers to item: Line (location: source ID 42, lines 32..33, bytes 933..957, hits: 21)
+  - Refers to item: Line (location: source ID 42, lines 32..33, bytes 933..957, hits: 28)
 - IC 1723 -> Item 564
 - Creation code
-  - Refers to item: Statement (location: source ID 42, lines 32..33, bytes 933..957, hits: 21)
+  - Refers to item: Statement (location: source ID 42, lines 32..33, bytes 933..957, hits: 28)
 - IC 1747 -> Item 565
 - Creation code
-  - Refers to item: Line (location: source ID 42, lines 33..34, bytes 967..980, hits: 21)
+  - Refers to item: Line (location: source ID 42, lines 33..34, bytes 967..980, hits: 28)
 - IC 1747 -> Item 566
 - Creation code
-  - Refers to item: Statement (location: source ID 42, lines 33..34, bytes 967..980, hits: 21)
+  - Refers to item: Statement (location: source ID 42, lines 33..34, bytes 967..980, hits: 28)
 - IC 272 -> Item 567
 - Creation code
   - Refers to item: Line (location: source ID 42, lines 39..56, bytes 1067..1615, hits: 13)
@@ -498,19 +417,19 @@ Anchors for Contract "MockStrategy" (solc 0.8.24, source ID 42):
   - Refers to item: Function "harvest" (location: source ID 42, lines 60..64, bytes 1684..1812, hits: 0)
 - IC 380 -> Item 595
 - Creation code
-  - Refers to item: Line (location: source ID 42, lines 68..71, bytes 1861..1982, hits: 72)
+  - Refers to item: Line (location: source ID 42, lines 68..71, bytes 1861..1982, hits: 89)
 - IC 380 -> Item 596
 - Creation code
-  - Refers to item: Function "balanceOf" (location: source ID 42, lines 68..71, bytes 1861..1982, hits: 72)
+  - Refers to item: Function "balanceOf" (location: source ID 42, lines 68..71, bytes 1861..1982, hits: 89)
 - IC 1233 -> Item 597
 - Creation code
-  - Refers to item: Line (location: source ID 42, lines 69..70, bytes 1933..1975, hits: 72)
+  - Refers to item: Line (location: source ID 42, lines 69..70, bytes 1933..1975, hits: 89)
 - IC 1233 -> Item 598
 - Creation code
-  - Refers to item: Statement (location: source ID 42, lines 69..70, bytes 1933..1975, hits: 72)
+  - Refers to item: Statement (location: source ID 42, lines 69..70, bytes 1933..1975, hits: 89)
 - IC 1233 -> Item 599
 - Creation code
-  - Refers to item: Statement (location: source ID 42, lines 69..70, bytes 1940..1975, hits: 72)
+  - Refers to item: Statement (location: source ID 42, lines 69..70, bytes 1940..1975, hits: 89)
 - IC 320 -> Item 600
 - Creation code
   - Refers to item: Line (location: source ID 42, lines 75..78, bytes 2037..2138, hits: 0)
@@ -590,41 +509,9 @@ Anchors for Contract "MockStrategy" (solc 0.8.24, source ID 42):
 - Creation code
   - Refers to item: Statement (location: source ID 42, lines 105..106, bytes 2918..2942, hits: 0)
 
-Anchors for Contract "stdMath" (solc 0.8.24, source ID 8):
-
-Anchors for Contract "IERC20Metadata" (solc 0.8.24, source ID 29):
-
-Anchors for Contract "StdUtils" (solc 0.8.24, source ID 12):
-
-Anchors for Contract "stdError" (solc 0.8.24, source ID 5):
-
-Anchors for Contract "StdInvariant" (solc 0.8.24, source ID 6):
-
-Anchors for Contract "Context" (solc 0.8.24, source ID 31):
-
-Anchors for Contract "IERC165" (solc 0.8.24, source ID 35):
-
-Anchors for Contract "IERC4626" (solc 0.8.24, source ID 23):
-
 Anchors for Contract "SafeCast" (solc 0.8.24, source ID 37):
 
-Anchors for Contract "ERC20Mock" (solc 0.8.24, source ID 25):
-
-Anchors for Contract "StdCheatsSafe" (solc 0.8.24, source ID 3):
-
 Anchors for Contract "testVaultUSDC" (solc 0.8.24, source ID 43):
-
-Anchors for Contract "stdStorageSafe" (solc 0.8.24, source ID 9):
-
-Anchors for Contract "Vm" (solc 0.8.24, source ID 14):
-
-Anchors for Contract "ReentrancyGuard" (solc 0.8.24, source ID 34):
-
-Anchors for Contract "ERC20" (solc 0.8.24, source ID 26):
-
-Anchors for Contract "ScriptBase" (solc 0.8.24, source ID 0):
-
-Anchors for Contract "console" (solc 0.8.24, source ID 15):
 
 Anchors for Contract "AaveYieldFarm" (solc 0.8.24, source ID 38):
 - IC 5 -> Item 12
@@ -1030,63 +917,139 @@ Anchors for Contract "AaveYieldFarm" (solc 0.8.24, source ID 38):
 - Creation code
   - Refers to item: Statement (location: source ID 38, lines 209..210, bytes 5659..5676, hits: 0)
 
+Anchors for Contract "StdCheatsSafe" (solc 0.8.24, source ID 3):
+
+Anchors for Contract "StdChains" (solc 0.8.24, source ID 2):
+
+Anchors for Contract "StdCheats" (solc 0.8.24, source ID 3):
+
+Anchors for Contract "IERC721Errors" (solc 0.8.24, source ID 24):
+
+Anchors for Contract "IAaveLendingPool" (solc 0.8.24, source ID 40):
+
+Anchors for Contract "console" (solc 0.8.24, source ID 15):
+
+Anchors for Contract "ERC4626" (solc 0.8.24, source ID 28):
+
 Anchors for Contract "Panic" (solc 0.8.24, source ID 32):
+
+Anchors for Contract "safeconsole" (solc 0.8.24, source ID 18):
+
+Anchors for Contract "SafeERC20" (solc 0.8.24, source ID 30):
+
+Anchors for Contract "Pausable" (solc 0.8.24, source ID 33):
+
+Anchors for Contract "IStrategy" (solc 0.8.24, source ID 41):
+
+Anchors for Contract "Context" (solc 0.8.24, source ID 31):
+
+Anchors for Contract "stdStorage" (solc 0.8.24, source ID 9):
+
+Anchors for Contract "stdStorageSafe" (solc 0.8.24, source ID 9):
+
+Anchors for Contract "StdStyle" (solc 0.8.24, source ID 10):
+
+Anchors for Contract "StdUtils" (solc 0.8.24, source ID 12):
+
+Anchors for Contract "Test" (solc 0.8.24, source ID 13):
+
+Anchors for Contract "IMulticall3" (solc 0.8.24, source ID 17):
+
+Anchors for Contract "CommonBase" (solc 0.8.24, source ID 0):
+
+Anchors for Contract "stdError" (solc 0.8.24, source ID 5):
+
+Anchors for Contract "ReentrancyGuard" (solc 0.8.24, source ID 34):
+
+Anchors for Contract "IERC20Metadata" (solc 0.8.24, source ID 29):
+
+Anchors for Contract "TestBase" (solc 0.8.24, source ID 0):
+
+Anchors for Contract "ERC20Mock" (solc 0.8.24, source ID 25):
+
+Anchors for Contract "IERC1363" (solc 0.8.24, source ID 20):
+
+Anchors for Contract "stdMath" (solc 0.8.24, source ID 8):
+
+Anchors for Contract "stdJson" (solc 0.8.24, source ID 7):
+
+Anchors for Contract "StdConstants" (solc 0.8.24, source ID 4):
+
+Anchors for Contract "IERC165" (solc 0.8.24, source ID 35):
+
+Anchors for Contract "ERC20" (solc 0.8.24, source ID 26):
+
+Anchors for Contract "IERC20" (solc 0.8.24, source ID 27):
+
+Anchors for Contract "ScriptBase" (solc 0.8.24, source ID 0):
+
+Anchors for Contract "Math" (solc 0.8.24, source ID 36):
+
+Anchors for Contract "IERC4626" (solc 0.8.24, source ID 23):
+
+Anchors for Contract "StdAssertions" (solc 0.8.24, source ID 1):
+
+Anchors for Contract "Ownable" (solc 0.8.24, source ID 19):
+
+Anchors for Contract "IERC1155Errors" (solc 0.8.24, source ID 24):
+
+Anchors for Contract "IERC20Errors" (solc 0.8.24, source ID 24):
 
 Anchors for Contract "VaultUSDC" (solc 0.8.24, source ID 39):
 - IC 11 -> Item 146
 - Runtime code
-  - Refers to item: Line (location: source ID 39, lines 66..74, bytes 2664..2948, hits: 36)
+  - Refers to item: Line (location: source ID 39, lines 66..74, bytes 2664..2948, hits: 52)
 - IC 11 -> Item 147
 - Runtime code
-  - Refers to item: Function "constructor" (location: source ID 39, lines 66..74, bytes 2664..2948, hits: 36)
+  - Refers to item: Function "constructor" (location: source ID 39, lines 66..74, bytes 2664..2948, hits: 52)
 - IC 457 -> Item 148
 - Runtime code
-  - Refers to item: Line (location: source ID 39, lines 67..68, bytes 2764..2791, hits: 36)
+  - Refers to item: Line (location: source ID 39, lines 67..68, bytes 2764..2791, hits: 52)
 - IC 457 -> Item 149
 - Runtime code
-  - Refers to item: Statement (location: source ID 39, lines 67..68, bytes 2764..2791, hits: 36)
+  - Refers to item: Statement (location: source ID 39, lines 67..68, bytes 2764..2791, hits: 52)
 - IC 469 -> Item 150
 - Runtime code
-  - Refers to item: Line (location: source ID 39, lines 68..69, bytes 2801..2828, hits: 36)
+  - Refers to item: Line (location: source ID 39, lines 68..69, bytes 2801..2828, hits: 52)
 - IC 469 -> Item 151
 - Runtime code
-  - Refers to item: Statement (location: source ID 39, lines 68..69, bytes 2801..2828, hits: 36)
+  - Refers to item: Statement (location: source ID 39, lines 68..69, bytes 2801..2828, hits: 52)
 - IC 481 -> Item 152
 - Runtime code
-  - Refers to item: Line (location: source ID 39, lines 69..70, bytes 2838..2857, hits: 36)
+  - Refers to item: Line (location: source ID 39, lines 69..70, bytes 2838..2857, hits: 52)
 - IC 481 -> Item 153
 - Runtime code
-  - Refers to item: Statement (location: source ID 39, lines 69..70, bytes 2838..2857, hits: 36)
+  - Refers to item: Statement (location: source ID 39, lines 69..70, bytes 2838..2857, hits: 52)
 - IC 489 -> Item 154
 - Runtime code
-  - Refers to item: Line (location: source ID 39, lines 70..71, bytes 2867..2885, hits: 36)
+  - Refers to item: Line (location: source ID 39, lines 70..71, bytes 2867..2885, hits: 52)
 - IC 489 -> Item 155
 - Runtime code
-  - Refers to item: Statement (location: source ID 39, lines 70..71, bytes 2867..2885, hits: 36)
+  - Refers to item: Statement (location: source ID 39, lines 70..71, bytes 2867..2885, hits: 52)
 - IC 496 -> Item 156
 - Runtime code
-  - Refers to item: Line (location: source ID 39, lines 71..72, bytes 2895..2917, hits: 36)
+  - Refers to item: Line (location: source ID 39, lines 71..72, bytes 2895..2917, hits: 52)
 - IC 496 -> Item 157
 - Runtime code
-  - Refers to item: Statement (location: source ID 39, lines 71..72, bytes 2895..2917, hits: 36)
+  - Refers to item: Statement (location: source ID 39, lines 71..72, bytes 2895..2917, hits: 52)
 - IC 503 -> Item 158
 - Runtime code
-  - Refers to item: Line (location: source ID 39, lines 72..73, bytes 2927..2941, hits: 36)
+  - Refers to item: Line (location: source ID 39, lines 72..73, bytes 2927..2941, hits: 52)
 - IC 503 -> Item 159
 - Runtime code
-  - Refers to item: Statement (location: source ID 39, lines 72..73, bytes 2927..2941, hits: 36)
+  - Refers to item: Statement (location: source ID 39, lines 72..73, bytes 2927..2941, hits: 52)
 - IC 5204 -> Item 134
 - Creation code
-  - Refers to item: Line (location: source ID 39, lines 56..60, bytes 2417..2529, hits: 23)
+  - Refers to item: Line (location: source ID 39, lines 56..60, bytes 2417..2529, hits: 30)
 - IC 5204 -> Item 135
 - Creation code
-  - Refers to item: Function "validAmount" (location: source ID 39, lines 56..60, bytes 2417..2529, hits: 23)
+  - Refers to item: Function "validAmount" (location: source ID 39, lines 56..60, bytes 2417..2529, hits: 30)
 - IC 5204 -> Item 136
 - Creation code
-  - Refers to item: Line (location: source ID 39, lines 57..58, bytes 2468..2479, hits: 23)
+  - Refers to item: Line (location: source ID 39, lines 57..58, bytes 2468..2479, hits: 30)
 - IC 5204 -> Item 137
 - Creation code
-  - Refers to item: Statement (location: source ID 39, lines 57..58, bytes 2468..2479, hits: 23)
+  - Refers to item: Statement (location: source ID 39, lines 57..58, bytes 2468..2479, hits: 30)
 - IC 5211 -> Item 138
 - Creation code
   - Refers to item: Branch (branch: 0, path: 0) (location: source ID 39, lines 57..58, bytes 2481..2511, hits: 1)
@@ -1095,16 +1058,16 @@ Anchors for Contract "VaultUSDC" (solc 0.8.24, source ID 39):
   - Refers to item: Statement (location: source ID 39, lines 57..58, bytes 2481..2511, hits: 1)
 - IC 5262 -> Item 140
 - Creation code
-  - Refers to item: Line (location: source ID 39, lines 61..65, bytes 2535..2658, hits: 22)
+  - Refers to item: Line (location: source ID 39, lines 61..65, bytes 2535..2658, hits: 29)
 - IC 5262 -> Item 141
 - Creation code
-  - Refers to item: Function "validAddress" (location: source ID 39, lines 61..65, bytes 2535..2658, hits: 22)
+  - Refers to item: Function "validAddress" (location: source ID 39, lines 61..65, bytes 2535..2658, hits: 29)
 - IC 5262 -> Item 142
 - Creation code
-  - Refers to item: Line (location: source ID 39, lines 62..63, bytes 2585..2603, hits: 22)
+  - Refers to item: Line (location: source ID 39, lines 62..63, bytes 2585..2603, hits: 29)
 - IC 5262 -> Item 143
 - Creation code
-  - Refers to item: Statement (location: source ID 39, lines 62..63, bytes 2585..2603, hits: 22)
+  - Refers to item: Statement (location: source ID 39, lines 62..63, bytes 2585..2603, hits: 29)
 - IC 5313 -> Item 144
 - Creation code
   - Refers to item: Branch (branch: 1, path: 0) (location: source ID 39, lines 62..63, bytes 2605..2640, hits: 1)
@@ -1113,16 +1076,16 @@ Anchors for Contract "VaultUSDC" (solc 0.8.24, source ID 39):
   - Refers to item: Statement (location: source ID 39, lines 62..63, bytes 2605..2640, hits: 1)
 - IC 1734 -> Item 160
 - Creation code
-  - Refers to item: Line (location: source ID 39, lines 75..107, bytes 2954..4036, hits: 24)
+  - Refers to item: Line (location: source ID 39, lines 75..107, bytes 2954..4036, hits: 32)
 - IC 1734 -> Item 161
 - Creation code
-  - Refers to item: Function "deposit" (location: source ID 39, lines 75..107, bytes 2954..4036, hits: 24)
+  - Refers to item: Function "deposit" (location: source ID 39, lines 75..107, bytes 2954..4036, hits: 32)
 - IC 5363 -> Item 162
 - Creation code
-  - Refers to item: Line (location: source ID 39, lines 76..77, bytes 3123..3147, hits: 21)
+  - Refers to item: Line (location: source ID 39, lines 76..77, bytes 3123..3147, hits: 28)
 - IC 5363 -> Item 163
 - Creation code
-  - Refers to item: Statement (location: source ID 39, lines 76..77, bytes 3123..3147, hits: 21)
+  - Refers to item: Statement (location: source ID 39, lines 76..77, bytes 3123..3147, hits: 28)
 - IC 5373 -> Item 164
 - Creation code
   - Refers to item: Branch (branch: 2, path: 0) (location: source ID 39, lines 76..79, bytes 3149..3213, hits: 1)
@@ -1134,109 +1097,109 @@ Anchors for Contract "VaultUSDC" (solc 0.8.24, source ID 39):
   - Refers to item: Statement (location: source ID 39, lines 77..78, bytes 3163..3202, hits: 1)
 - IC 5423 -> Item 167
 - Creation code
-  - Refers to item: Line (location: source ID 39, lines 80..81, bytes 3223..3275, hits: 20)
+  - Refers to item: Line (location: source ID 39, lines 80..81, bytes 3223..3275, hits: 27)
 - IC 5423 -> Item 168
 - Creation code
-  - Refers to item: Statement (location: source ID 39, lines 80..81, bytes 3223..3275, hits: 20)
+  - Refers to item: Statement (location: source ID 39, lines 80..81, bytes 3223..3275, hits: 27)
 - IC 5424 -> Item 169
 - Creation code
-  - Refers to item: Statement (location: source ID 39, lines 80..81, bytes 3243..3275, hits: 20)
+  - Refers to item: Statement (location: source ID 39, lines 80..81, bytes 3243..3275, hits: 27)
 - IC 5453 -> Item 170
 - Creation code
-  - Refers to item: Line (location: source ID 39, lines 81..82, bytes 3285..3328, hits: 20)
+  - Refers to item: Line (location: source ID 39, lines 81..82, bytes 3285..3328, hits: 27)
 - IC 5453 -> Item 171
 - Creation code
-  - Refers to item: Statement (location: source ID 39, lines 81..82, bytes 3285..3328, hits: 20)
+  - Refers to item: Statement (location: source ID 39, lines 81..82, bytes 3285..3328, hits: 27)
 - IC 5454 -> Item 172
 - Creation code
-  - Refers to item: Statement (location: source ID 39, lines 81..82, bytes 3310..3328, hits: 20)
+  - Refers to item: Statement (location: source ID 39, lines 81..82, bytes 3310..3328, hits: 27)
 - IC 5468 -> Item 173
 - Creation code
-  - Refers to item: Line (location: source ID 39, lines 83..84, bytes 3343..3356, hits: 20)
+  - Refers to item: Line (location: source ID 39, lines 83..84, bytes 3343..3356, hits: 27)
 - IC 5468 -> Item 174
 - Creation code
-  - Refers to item: Statement (location: source ID 39, lines 83..84, bytes 3343..3356, hits: 20)
+  - Refers to item: Statement (location: source ID 39, lines 83..84, bytes 3343..3356, hits: 27)
 - IC 5476 -> Item 175
 - Creation code
-  - Refers to item: Branch (branch: 3, path: 0) (location: source ID 39, lines 83..87, bytes 3358..3492, hits: 20)
+  - Refers to item: Branch (branch: 3, path: 0) (location: source ID 39, lines 83..87, bytes 3358..3492, hits: 27)
 - IC 5476 -> Item 176
 - Creation code
-  - Refers to item: Line (location: source ID 39, lines 84..85, bytes 3372..3436, hits: 20)
+  - Refers to item: Line (location: source ID 39, lines 84..85, bytes 3372..3436, hits: 27)
 - IC 5476 -> Item 177
 - Creation code
-  - Refers to item: Statement (location: source ID 39, lines 84..85, bytes 3372..3436, hits: 20)
+  - Refers to item: Statement (location: source ID 39, lines 84..85, bytes 3372..3436, hits: 27)
 - IC 5535 -> Item 178
 - Creation code
-  - Refers to item: Line (location: source ID 39, lines 85..86, bytes 3450..3481, hits: 20)
+  - Refers to item: Line (location: source ID 39, lines 85..86, bytes 3450..3481, hits: 27)
 - IC 5535 -> Item 179
 - Creation code
-  - Refers to item: Statement (location: source ID 39, lines 85..86, bytes 3450..3481, hits: 20)
+  - Refers to item: Statement (location: source ID 39, lines 85..86, bytes 3450..3481, hits: 27)
 - IC 5560 -> Item 180
 - Creation code
-  - Refers to item: Line (location: source ID 39, lines 88..89, bytes 3502..3558, hits: 20)
+  - Refers to item: Line (location: source ID 39, lines 88..89, bytes 3502..3558, hits: 27)
 - IC 5560 -> Item 181
 - Creation code
-  - Refers to item: Statement (location: source ID 39, lines 88..89, bytes 3502..3558, hits: 20)
+  - Refers to item: Statement (location: source ID 39, lines 88..89, bytes 3502..3558, hits: 27)
 - IC 5561 -> Item 182
 - Creation code
-  - Refers to item: Statement (location: source ID 39, lines 88..89, bytes 3519..3558, hits: 20)
+  - Refers to item: Statement (location: source ID 39, lines 88..89, bytes 3519..3558, hits: 27)
 - IC 5573 -> Item 183
 - Creation code
-  - Refers to item: Line (location: source ID 39, lines 91..92, bytes 3582..3610, hits: 20)
+  - Refers to item: Line (location: source ID 39, lines 91..92, bytes 3582..3610, hits: 27)
 - IC 5573 -> Item 184
 - Creation code
-  - Refers to item: Statement (location: source ID 39, lines 91..92, bytes 3582..3610, hits: 20)
+  - Refers to item: Statement (location: source ID 39, lines 91..92, bytes 3582..3610, hits: 27)
 - IC 5641 -> Item 185
 - Creation code
-  - Refers to item: Branch (branch: 4, path: 0) (location: source ID 39, lines 91..95, bytes 3612..3711, hits: 19)
+  - Refers to item: Branch (branch: 4, path: 0) (location: source ID 39, lines 91..95, bytes 3612..3711, hits: 26)
 - IC 5641 -> Item 186
 - Creation code
-  - Refers to item: Line (location: source ID 39, lines 92..93, bytes 3626..3638, hits: 19)
+  - Refers to item: Line (location: source ID 39, lines 92..93, bytes 3626..3638, hits: 26)
 - IC 5641 -> Item 187
 - Creation code
-  - Refers to item: Statement (location: source ID 39, lines 92..93, bytes 3626..3638, hits: 19)
+  - Refers to item: Statement (location: source ID 39, lines 92..93, bytes 3626..3638, hits: 26)
 - IC 5664 -> Item 188
 - Creation code
-  - Refers to item: Line (location: source ID 39, lines 93..94, bytes 3652..3700, hits: 19)
+  - Refers to item: Line (location: source ID 39, lines 93..94, bytes 3652..3700, hits: 26)
 - IC 5664 -> Item 189
 - Creation code
-  - Refers to item: Statement (location: source ID 39, lines 93..94, bytes 3652..3700, hits: 19)
+  - Refers to item: Statement (location: source ID 39, lines 93..94, bytes 3652..3700, hits: 26)
 - IC 5731 -> Item 190
 - Creation code
-  - Refers to item: Line (location: source ID 39, lines 96..97, bytes 3729..3770, hits: 20)
+  - Refers to item: Line (location: source ID 39, lines 96..97, bytes 3729..3770, hits: 27)
 - IC 5731 -> Item 191
 - Creation code
-  - Refers to item: Statement (location: source ID 39, lines 96..97, bytes 3729..3770, hits: 20)
+  - Refers to item: Statement (location: source ID 39, lines 96..97, bytes 3729..3770, hits: 27)
 - IC 5814 -> Item 192
 - Creation code
-  - Refers to item: Line (location: source ID 39, lines 97..98, bytes 3780..3826, hits: 20)
+  - Refers to item: Line (location: source ID 39, lines 97..98, bytes 3780..3826, hits: 27)
 - IC 5814 -> Item 193
 - Creation code
-  - Refers to item: Statement (location: source ID 39, lines 97..98, bytes 3780..3826, hits: 20)
+  - Refers to item: Statement (location: source ID 39, lines 97..98, bytes 3780..3826, hits: 27)
 - IC 5897 -> Item 194
 - Creation code
-  - Refers to item: Line (location: source ID 39, lines 98..99, bytes 3836..3868, hits: 20)
+  - Refers to item: Line (location: source ID 39, lines 98..99, bytes 3836..3868, hits: 27)
 - IC 5897 -> Item 195
 - Creation code
-  - Refers to item: Statement (location: source ID 39, lines 98..99, bytes 3836..3868, hits: 20)
+  - Refers to item: Statement (location: source ID 39, lines 98..99, bytes 3836..3868, hits: 27)
 - IC 5921 -> Item 196
 - Creation code
-  - Refers to item: Line (location: source ID 39, lines 101..102, bytes 3886..3908, hits: 20)
+  - Refers to item: Line (location: source ID 39, lines 101..102, bytes 3886..3908, hits: 27)
 - IC 5921 -> Item 197
 - Creation code
-  - Refers to item: Statement (location: source ID 39, lines 101..102, bytes 3886..3908, hits: 20)
+  - Refers to item: Statement (location: source ID 39, lines 101..102, bytes 3886..3908, hits: 27)
 - IC 5929 -> Item 198
 - Creation code
-  - Refers to item: Line (location: source ID 39, lines 103..104, bytes 3919..4005, hits: 20)
+  - Refers to item: Line (location: source ID 39, lines 103..104, bytes 3919..4005, hits: 27)
 - IC 5929 -> Item 199
 - Creation code
-  - Refers to item: Statement (location: source ID 39, lines 103..104, bytes 3919..4005, hits: 20)
+  - Refers to item: Statement (location: source ID 39, lines 103..104, bytes 3919..4005, hits: 27)
 - IC 6036 -> Item 200
 - Creation code
-  - Refers to item: Line (location: source ID 39, lines 105..106, bytes 4016..4029, hits: 20)
+  - Refers to item: Line (location: source ID 39, lines 105..106, bytes 4016..4029, hits: 27)
 - IC 6036 -> Item 201
 - Creation code
-  - Refers to item: Statement (location: source ID 39, lines 105..106, bytes 4016..4029, hits: 20)
+  - Refers to item: Statement (location: source ID 39, lines 105..106, bytes 4016..4029, hits: 27)
 - IC 2901 -> Item 202
 - Creation code
   - Refers to item: Line (location: source ID 39, lines 109..131, bytes 4043..4690, hits: 2)
@@ -1245,10 +1208,10 @@ Anchors for Contract "VaultUSDC" (solc 0.8.24, source ID 39):
   - Refers to item: Function "_rebalanceToStrategy" (location: source ID 39, lines 109..131, bytes 4043..4690, hits: 2)
 - IC 9853 -> Item 204
 - Creation code
-  - Refers to item: Line (location: source ID 39, lines 111..112, bytes 4104..4126, hits: 24)
+  - Refers to item: Line (location: source ID 39, lines 111..112, bytes 4104..4126, hits: 31)
 - IC 9853 -> Item 205
 - Creation code
-  - Refers to item: Statement (location: source ID 39, lines 111..112, bytes 4104..4126, hits: 24)
+  - Refers to item: Statement (location: source ID 39, lines 111..112, bytes 4104..4126, hits: 31)
 - IC 9937 -> Item 206
 - Creation code
   - Refers to item: Branch (branch: 5, path: 0) (location: source ID 39, lines 111..114, bytes 4128..4186, hits: 1)
@@ -1260,28 +1223,28 @@ Anchors for Contract "VaultUSDC" (solc 0.8.24, source ID 39):
   - Refers to item: Statement (location: source ID 39, lines 112..113, bytes 4142..4175, hits: 1)
 - IC 9987 -> Item 209
 - Creation code
-  - Refers to item: Line (location: source ID 39, lines 115..116, bytes 4196..4259, hits: 23)
+  - Refers to item: Line (location: source ID 39, lines 115..116, bytes 4196..4259, hits: 30)
 - IC 9987 -> Item 210
 - Creation code
-  - Refers to item: Statement (location: source ID 39, lines 115..116, bytes 4196..4259, hits: 23)
+  - Refers to item: Statement (location: source ID 39, lines 115..116, bytes 4196..4259, hits: 30)
 - IC 9988 -> Item 211
 - Creation code
-  - Refers to item: Statement (location: source ID 39, lines 115..116, bytes 4219..4259, hits: 23)
+  - Refers to item: Statement (location: source ID 39, lines 115..116, bytes 4219..4259, hits: 30)
 - IC 10117 -> Item 212
 - Creation code
-  - Refers to item: Line (location: source ID 39, lines 116..117, bytes 4269..4298, hits: 23)
+  - Refers to item: Line (location: source ID 39, lines 116..117, bytes 4269..4298, hits: 30)
 - IC 10117 -> Item 213
 - Creation code
-  - Refers to item: Statement (location: source ID 39, lines 116..117, bytes 4269..4298, hits: 23)
+  - Refers to item: Statement (location: source ID 39, lines 116..117, bytes 4269..4298, hits: 30)
 - IC 10118 -> Item 214
 - Creation code
-  - Refers to item: Statement (location: source ID 39, lines 116..117, bytes 4285..4298, hits: 23)
+  - Refers to item: Statement (location: source ID 39, lines 116..117, bytes 4285..4298, hits: 30)
 - IC 10128 -> Item 215
 - Creation code
-  - Refers to item: Line (location: source ID 39, lines 118..119, bytes 4313..4323, hits: 23)
+  - Refers to item: Line (location: source ID 39, lines 118..119, bytes 4313..4323, hits: 30)
 - IC 10128 -> Item 216
 - Creation code
-  - Refers to item: Statement (location: source ID 39, lines 118..119, bytes 4313..4323, hits: 23)
+  - Refers to item: Statement (location: source ID 39, lines 118..119, bytes 4313..4323, hits: 30)
 - IC 10135 -> Item 217
 - Creation code
   - Refers to item: Branch (branch: 6, path: 0) (location: source ID 39, lines 118..121, bytes 4325..4378, hits: 1)
@@ -1293,43 +1256,43 @@ Anchors for Contract "VaultUSDC" (solc 0.8.24, source ID 39):
   - Refers to item: Statement (location: source ID 39, lines 119..120, bytes 4339..4367, hits: 1)
 - IC 10185 -> Item 220
 - Creation code
-  - Refers to item: Line (location: source ID 39, lines 122..123, bytes 4388..4450, hits: 22)
+  - Refers to item: Line (location: source ID 39, lines 122..123, bytes 4388..4450, hits: 29)
 - IC 10185 -> Item 221
 - Creation code
-  - Refers to item: Statement (location: source ID 39, lines 122..123, bytes 4388..4450, hits: 22)
+  - Refers to item: Statement (location: source ID 39, lines 122..123, bytes 4388..4450, hits: 29)
 - IC 10186 -> Item 222
 - Creation code
-  - Refers to item: Statement (location: source ID 39, lines 122..123, bytes 4414..4450, hits: 22)
+  - Refers to item: Statement (location: source ID 39, lines 122..123, bytes 4414..4450, hits: 29)
 - IC 10215 -> Item 223
 - Creation code
-  - Refers to item: Line (location: source ID 39, lines 124..125, bytes 4464..4494, hits: 22)
+  - Refers to item: Line (location: source ID 39, lines 124..125, bytes 4464..4494, hits: 29)
 - IC 10215 -> Item 224
 - Creation code
-  - Refers to item: Statement (location: source ID 39, lines 124..125, bytes 4464..4494, hits: 22)
+  - Refers to item: Statement (location: source ID 39, lines 124..125, bytes 4464..4494, hits: 29)
 - IC 10223 -> Item 225
 - Creation code
-  - Refers to item: Branch (branch: 7, path: 0) (location: source ID 39, lines 124..130, bytes 4496..4684, hits: 21)
+  - Refers to item: Branch (branch: 7, path: 0) (location: source ID 39, lines 124..130, bytes 4496..4684, hits: 28)
 - IC 10223 -> Item 226
 - Creation code
-  - Refers to item: Line (location: source ID 39, lines 125..126, bytes 4510..4557, hits: 21)
+  - Refers to item: Line (location: source ID 39, lines 125..126, bytes 4510..4557, hits: 28)
 - IC 10223 -> Item 227
 - Creation code
-  - Refers to item: Statement (location: source ID 39, lines 125..126, bytes 4510..4557, hits: 21)
+  - Refers to item: Statement (location: source ID 39, lines 125..126, bytes 4510..4557, hits: 28)
 - IC 10224 -> Item 228
 - Creation code
-  - Refers to item: Statement (location: source ID 39, lines 125..126, bytes 4527..4557, hits: 21)
+  - Refers to item: Statement (location: source ID 39, lines 125..126, bytes 4527..4557, hits: 28)
 - IC 10238 -> Item 229
 - Creation code
-  - Refers to item: Line (location: source ID 39, lines 127..128, bytes 4583..4624, hits: 21)
+  - Refers to item: Line (location: source ID 39, lines 127..128, bytes 4583..4624, hits: 28)
 - IC 10238 -> Item 230
 - Creation code
-  - Refers to item: Statement (location: source ID 39, lines 127..128, bytes 4583..4624, hits: 21)
+  - Refers to item: Statement (location: source ID 39, lines 127..128, bytes 4583..4624, hits: 28)
 - IC 10402 -> Item 231
 - Creation code
-  - Refers to item: Line (location: source ID 39, lines 128..129, bytes 4638..4673, hits: 21)
+  - Refers to item: Line (location: source ID 39, lines 128..129, bytes 4638..4673, hits: 28)
 - IC 10402 -> Item 232
 - Creation code
-  - Refers to item: Statement (location: source ID 39, lines 128..129, bytes 4638..4673, hits: 21)
+  - Refers to item: Statement (location: source ID 39, lines 128..129, bytes 4638..4673, hits: 28)
 - IC 2411 -> Item 233
 - Creation code
   - Refers to item: Line (location: source ID 39, lines 132..173, bytes 4696..5914, hits: 10)
@@ -1770,43 +1733,43 @@ Anchors for Contract "VaultUSDC" (solc 0.8.24, source ID 39):
   - Refers to item: Function "totalAssets" (location: source ID 39, lines 244..254, bytes 8210..8565, hits: 1)
 - IC 3019 -> Item 379
 - Creation code
-  - Refers to item: Line (location: source ID 39, lines 245..246, bytes 8282..8345, hits: 72)
+  - Refers to item: Line (location: source ID 39, lines 245..246, bytes 8282..8345, hits: 89)
 - IC 3019 -> Item 380
 - Creation code
-  - Refers to item: Statement (location: source ID 39, lines 245..246, bytes 8282..8345, hits: 72)
+  - Refers to item: Statement (location: source ID 39, lines 245..246, bytes 8282..8345, hits: 89)
 - IC 3020 -> Item 381
 - Creation code
-  - Refers to item: Statement (location: source ID 39, lines 245..246, bytes 8305..8345, hits: 72)
+  - Refers to item: Statement (location: source ID 39, lines 245..246, bytes 8305..8345, hits: 89)
 - IC 3149 -> Item 382
 - Creation code
-  - Refers to item: Line (location: source ID 39, lines 246..247, bytes 8355..8382, hits: 72)
+  - Refers to item: Line (location: source ID 39, lines 246..247, bytes 8355..8382, hits: 89)
 - IC 3149 -> Item 383
 - Creation code
-  - Refers to item: Statement (location: source ID 39, lines 246..247, bytes 8355..8382, hits: 72)
+  - Refers to item: Statement (location: source ID 39, lines 246..247, bytes 8355..8382, hits: 89)
 - IC 3150 -> Item 384
 - Creation code
-  - Refers to item: Line (location: source ID 39, lines 248..249, bytes 8405..8427, hits: 72)
+  - Refers to item: Line (location: source ID 39, lines 248..249, bytes 8405..8427, hits: 89)
 - IC 3150 -> Item 385
 - Creation code
-  - Refers to item: Statement (location: source ID 39, lines 248..249, bytes 8405..8427, hits: 72)
+  - Refers to item: Statement (location: source ID 39, lines 248..249, bytes 8405..8427, hits: 89)
 - IC 3234 -> Item 386
 - Creation code
-  - Refers to item: Branch (branch: 22, path: 0) (location: source ID 39, lines 248..251, bytes 8429..8503, hits: 72)
+  - Refers to item: Branch (branch: 22, path: 0) (location: source ID 39, lines 248..251, bytes 8429..8503, hits: 89)
 - IC 3234 -> Item 387
 - Creation code
-  - Refers to item: Line (location: source ID 39, lines 249..250, bytes 8443..8492, hits: 72)
+  - Refers to item: Line (location: source ID 39, lines 249..250, bytes 8443..8492, hits: 89)
 - IC 3234 -> Item 388
 - Creation code
-  - Refers to item: Statement (location: source ID 39, lines 249..250, bytes 8443..8492, hits: 72)
+  - Refers to item: Statement (location: source ID 39, lines 249..250, bytes 8443..8492, hits: 89)
 - IC 3379 -> Item 389
 - Creation code
-  - Refers to item: Line (location: source ID 39, lines 252..253, bytes 8521..8558, hits: 72)
+  - Refers to item: Line (location: source ID 39, lines 252..253, bytes 8521..8558, hits: 89)
 - IC 3379 -> Item 390
 - Creation code
-  - Refers to item: Statement (location: source ID 39, lines 252..253, bytes 8521..8558, hits: 72)
+  - Refers to item: Statement (location: source ID 39, lines 252..253, bytes 8521..8558, hits: 89)
 - IC 3379 -> Item 391
 - Creation code
-  - Refers to item: Statement (location: source ID 39, lines 252..253, bytes 8528..8558, hits: 72)
+  - Refers to item: Statement (location: source ID 39, lines 252..253, bytes 8528..8558, hits: 89)
 - IC 1916 -> Item 392
 - Creation code
   - Refers to item: Line (location: source ID 39, lines 255..258, bytes 8571..8650, hits: 2)
@@ -1884,16 +1847,16 @@ Anchors for Contract "VaultUSDC" (solc 0.8.24, source ID 39):
   - Refers to item: Statement (location: source ID 39, lines 270..271, bytes 9054..9093, hits: 1)
 - IC 1352 -> Item 417
 - Creation code
-  - Refers to item: Line (location: source ID 39, lines 275..279, bytes 9121..9281, hits: 38)
+  - Refers to item: Line (location: source ID 39, lines 275..279, bytes 9121..9281, hits: 54)
 - IC 1352 -> Item 418
 - Creation code
-  - Refers to item: Function "setStrategy" (location: source ID 39, lines 275..279, bytes 9121..9281, hits: 38)
+  - Refers to item: Function "setStrategy" (location: source ID 39, lines 275..279, bytes 9121..9281, hits: 54)
 - IC 4303 -> Item 419
 - Creation code
-  - Refers to item: Line (location: source ID 39, lines 276..277, bytes 9190..9213, hits: 38)
+  - Refers to item: Line (location: source ID 39, lines 276..277, bytes 9190..9213, hits: 54)
 - IC 4303 -> Item 420
 - Creation code
-  - Refers to item: Statement (location: source ID 39, lines 276..277, bytes 9190..9213, hits: 38)
+  - Refers to item: Statement (location: source ID 39, lines 276..277, bytes 9190..9213, hits: 54)
 - IC 4354 -> Item 421
 - Creation code
   - Refers to item: Branch (branch: 26, path: 0) (location: source ID 39, lines 276..277, bytes 9215..9248, hits: 1)
@@ -1902,10 +1865,10 @@ Anchors for Contract "VaultUSDC" (solc 0.8.24, source ID 39):
   - Refers to item: Statement (location: source ID 39, lines 276..277, bytes 9215..9248, hits: 1)
 - IC 4404 -> Item 423
 - Creation code
-  - Refers to item: Line (location: source ID 39, lines 277..278, bytes 9254..9274, hits: 37)
+  - Refers to item: Line (location: source ID 39, lines 277..278, bytes 9254..9274, hits: 53)
 - IC 4404 -> Item 424
 - Creation code
-  - Refers to item: Statement (location: source ID 39, lines 277..278, bytes 9254..9274, hits: 37)
+  - Refers to item: Statement (location: source ID 39, lines 277..278, bytes 9254..9274, hits: 53)
 - IC 2132 -> Item 425
 - Creation code
   - Refers to item: Line (location: source ID 39, lines 280..284, bytes 9287..9409, hits: 1)
@@ -2019,281 +1982,261 @@ Anchors for Contract "VaultUSDC" (solc 0.8.24, source ID 39):
   - Refers to item: Statement (location: source ID 39, lines 303..304, bytes 10397..10433, hits: 1)
 - IC 2845 -> Item 462
 - Creation code
-  - Refers to item: Line (location: source ID 39, lines 306..320, bytes 10446..10876, hits: 0)
+  - Refers to item: Line (location: source ID 39, lines 306..320, bytes 10446..10876, hits: 5)
 - IC 2845 -> Item 463
 - Creation code
-  - Refers to item: Function "canDeposit" (location: source ID 39, lines 306..320, bytes 10446..10876, hits: 0)
+  - Refers to item: Function "canDeposit" (location: source ID 39, lines 306..320, bytes 10446..10876, hits: 5)
 - IC 9305 -> Item 464
 - Creation code
-  - Refers to item: Line (location: source ID 39, lines 307..308, bytes 10524..10532, hits: 0)
+  - Refers to item: Line (location: source ID 39, lines 307..308, bytes 10524..10532, hits: 5)
 - IC 9305 -> Item 465
 - Creation code
-  - Refers to item: Statement (location: source ID 39, lines 307..308, bytes 10524..10532, hits: 0)
+  - Refers to item: Statement (location: source ID 39, lines 307..308, bytes 10524..10532, hits: 5)
 - IC 9318 -> Item 466
 - Creation code
-  - Refers to item: Branch (branch: 27, path: 0) (location: source ID 39, lines 307..310, bytes 10534..10590, hits: 0)
+  - Refers to item: Branch (branch: 27, path: 0) (location: source ID 39, lines 307..310, bytes 10534..10590, hits: 1)
 - IC 9318 -> Item 467
 - Creation code
-  - Refers to item: Line (location: source ID 39, lines 308..309, bytes 10548..10579, hits: 0)
+  - Refers to item: Line (location: source ID 39, lines 308..309, bytes 10548..10579, hits: 1)
 - IC 9318 -> Item 468
 - Creation code
-  - Refers to item: Statement (location: source ID 39, lines 308..309, bytes 10548..10579, hits: 0)
+  - Refers to item: Statement (location: source ID 39, lines 308..309, bytes 10548..10579, hits: 1)
 - IC 9368 -> Item 469
 - Creation code
-  - Refers to item: Line (location: source ID 39, lines 310..311, bytes 10603..10614, hits: 0)
+  - Refers to item: Line (location: source ID 39, lines 310..311, bytes 10603..10614, hits: 4)
 - IC 9368 -> Item 470
 - Creation code
-  - Refers to item: Statement (location: source ID 39, lines 310..311, bytes 10603..10614, hits: 0)
+  - Refers to item: Statement (location: source ID 39, lines 310..311, bytes 10603..10614, hits: 4)
 - IC 9375 -> Item 471
 - Creation code
-  - Refers to item: Branch (branch: 28, path: 0) (location: source ID 39, lines 310..313, bytes 10616..10671, hits: 0)
+  - Refers to item: Branch (branch: 28, path: 0) (location: source ID 39, lines 310..313, bytes 10616..10671, hits: 1)
 - IC 9375 -> Item 472
 - Creation code
-  - Refers to item: Line (location: source ID 39, lines 311..312, bytes 10630..10660, hits: 0)
+  - Refers to item: Line (location: source ID 39, lines 311..312, bytes 10630..10660, hits: 1)
 - IC 9375 -> Item 473
 - Creation code
-  - Refers to item: Statement (location: source ID 39, lines 311..312, bytes 10630..10660, hits: 0)
+  - Refers to item: Statement (location: source ID 39, lines 311..312, bytes 10630..10660, hits: 1)
 - IC 9425 -> Item 474
 - Creation code
-  - Refers to item: Line (location: source ID 39, lines 313..314, bytes 10684..10708, hits: 0)
+  - Refers to item: Line (location: source ID 39, lines 313..314, bytes 10684..10708, hits: 3)
 - IC 9425 -> Item 475
 - Creation code
-  - Refers to item: Statement (location: source ID 39, lines 313..314, bytes 10684..10708, hits: 0)
+  - Refers to item: Statement (location: source ID 39, lines 313..314, bytes 10684..10708, hits: 3)
 - IC 9435 -> Item 476
 - Creation code
-  - Refers to item: Branch (branch: 29, path: 0) (location: source ID 39, lines 313..316, bytes 10710..10774, hits: 0)
+  - Refers to item: Branch (branch: 29, path: 0) (location: source ID 39, lines 313..316, bytes 10710..10774, hits: 1)
 - IC 9435 -> Item 477
 - Creation code
-  - Refers to item: Line (location: source ID 39, lines 314..315, bytes 10724..10763, hits: 0)
+  - Refers to item: Line (location: source ID 39, lines 314..315, bytes 10724..10763, hits: 1)
 - IC 9435 -> Item 478
 - Creation code
-  - Refers to item: Statement (location: source ID 39, lines 314..315, bytes 10724..10763, hits: 0)
+  - Refers to item: Statement (location: source ID 39, lines 314..315, bytes 10724..10763, hits: 1)
 - IC 9485 -> Item 479
 - Creation code
-  - Refers to item: Line (location: source ID 39, lines 316..317, bytes 10787..10805, hits: 0)
+  - Refers to item: Line (location: source ID 39, lines 316..317, bytes 10787..10805, hits: 2)
 - IC 9485 -> Item 480
 - Creation code
-  - Refers to item: Statement (location: source ID 39, lines 316..317, bytes 10787..10805, hits: 0)
+  - Refers to item: Statement (location: source ID 39, lines 316..317, bytes 10787..10805, hits: 2)
 - IC 9536 -> Item 481
 - Creation code
-  - Refers to item: Branch (branch: 30, path: 0) (location: source ID 39, lines 316..319, bytes 10807..10870, hits: 0)
+  - Refers to item: Branch (branch: 30, path: 0) (location: source ID 39, lines 316..319, bytes 10807..10870, hits: 1)
 - IC 9536 -> Item 482
 - Creation code
-  - Refers to item: Line (location: source ID 39, lines 317..318, bytes 10821..10859, hits: 0)
+  - Refers to item: Line (location: source ID 39, lines 317..318, bytes 10821..10859, hits: 1)
 - IC 9536 -> Item 483
 - Creation code
-  - Refers to item: Statement (location: source ID 39, lines 317..318, bytes 10821..10859, hits: 0)
+  - Refers to item: Statement (location: source ID 39, lines 317..318, bytes 10821..10859, hits: 1)
 - IC 2873 -> Item 484
 - Creation code
-  - Refers to item: Line (location: source ID 39, lines 321..336, bytes 10882..11380, hits: 0)
+  - Refers to item: Line (location: source ID 39, lines 321..336, bytes 10882..11380, hits: 6)
 - IC 2873 -> Item 485
 - Creation code
-  - Refers to item: Function "canWithdraw" (location: source ID 39, lines 321..336, bytes 10882..11380, hits: 0)
+  - Refers to item: Function "canWithdraw" (location: source ID 39, lines 321..336, bytes 10882..11380, hits: 6)
 - IC 9590 -> Item 486
 - Creation code
-  - Refers to item: Line (location: source ID 39, lines 322..323, bytes 10961..10969, hits: 0)
+  - Refers to item: Line (location: source ID 39, lines 322..323, bytes 10961..10969, hits: 6)
 - IC 9590 -> Item 487
 - Creation code
-  - Refers to item: Statement (location: source ID 39, lines 322..323, bytes 10961..10969, hits: 0)
+  - Refers to item: Statement (location: source ID 39, lines 322..323, bytes 10961..10969, hits: 6)
 - IC 9603 -> Item 488
 - Creation code
-  - Refers to item: Branch (branch: 31, path: 0) (location: source ID 39, lines 322..325, bytes 10971..11027, hits: 0)
+  - Refers to item: Branch (branch: 31, path: 0) (location: source ID 39, lines 322..325, bytes 10971..11027, hits: 1)
 - IC 9603 -> Item 489
 - Creation code
-  - Refers to item: Line (location: source ID 39, lines 323..324, bytes 10985..11016, hits: 0)
+  - Refers to item: Line (location: source ID 39, lines 323..324, bytes 10985..11016, hits: 1)
 - IC 9603 -> Item 490
 - Creation code
-  - Refers to item: Statement (location: source ID 39, lines 323..324, bytes 10985..11016, hits: 0)
+  - Refers to item: Statement (location: source ID 39, lines 323..324, bytes 10985..11016, hits: 1)
 - IC 9653 -> Item 491
 - Creation code
-  - Refers to item: Line (location: source ID 39, lines 325..326, bytes 11040..11051, hits: 0)
+  - Refers to item: Line (location: source ID 39, lines 325..326, bytes 11040..11051, hits: 5)
 - IC 9653 -> Item 492
 - Creation code
-  - Refers to item: Statement (location: source ID 39, lines 325..326, bytes 11040..11051, hits: 0)
+  - Refers to item: Statement (location: source ID 39, lines 325..326, bytes 11040..11051, hits: 5)
 - IC 9660 -> Item 493
 - Creation code
-  - Refers to item: Branch (branch: 32, path: 0) (location: source ID 39, lines 325..328, bytes 11053..11108, hits: 0)
+  - Refers to item: Branch (branch: 32, path: 0) (location: source ID 39, lines 325..328, bytes 11053..11108, hits: 1)
 - IC 9660 -> Item 494
 - Creation code
-  - Refers to item: Line (location: source ID 39, lines 326..327, bytes 11067..11097, hits: 0)
+  - Refers to item: Line (location: source ID 39, lines 326..327, bytes 11067..11097, hits: 1)
 - IC 9660 -> Item 495
 - Creation code
-  - Refers to item: Statement (location: source ID 39, lines 326..327, bytes 11067..11097, hits: 0)
+  - Refers to item: Statement (location: source ID 39, lines 326..327, bytes 11067..11097, hits: 1)
 - IC 9710 -> Item 496
 - Creation code
-  - Refers to item: Line (location: source ID 39, lines 328..329, bytes 11121..11146, hits: 0)
+  - Refers to item: Line (location: source ID 39, lines 328..329, bytes 11121..11146, hits: 4)
 - IC 9710 -> Item 497
 - Creation code
-  - Refers to item: Statement (location: source ID 39, lines 328..329, bytes 11121..11146, hits: 0)
+  - Refers to item: Statement (location: source ID 39, lines 328..329, bytes 11121..11146, hits: 4)
 - IC 9720 -> Item 498
 - Creation code
-  - Refers to item: Branch (branch: 33, path: 0) (location: source ID 39, lines 328..331, bytes 11148..11213, hits: 0)
+  - Refers to item: Branch (branch: 33, path: 0) (location: source ID 39, lines 328..331, bytes 11148..11213, hits: 1)
 - IC 9720 -> Item 499
 - Creation code
-  - Refers to item: Line (location: source ID 39, lines 329..330, bytes 11162..11202, hits: 0)
+  - Refers to item: Line (location: source ID 39, lines 329..330, bytes 11162..11202, hits: 1)
 - IC 9720 -> Item 500
 - Creation code
-  - Refers to item: Statement (location: source ID 39, lines 329..330, bytes 11162..11202, hits: 0)
+  - Refers to item: Statement (location: source ID 39, lines 329..330, bytes 11162..11202, hits: 1)
 - IC 9770 -> Item 501
 - Creation code
-  - Refers to item: Line (location: source ID 39, lines 331..332, bytes 11222..11275, hits: 0)
+  - Refers to item: Line (location: source ID 39, lines 331..332, bytes 11222..11275, hits: 3)
 - IC 9770 -> Item 502
 - Creation code
-  - Refers to item: Statement (location: source ID 39, lines 331..332, bytes 11222..11275, hits: 0)
+  - Refers to item: Statement (location: source ID 39, lines 331..332, bytes 11222..11275, hits: 3)
 - IC 9771 -> Item 503
 - Creation code
-  - Refers to item: Statement (location: source ID 39, lines 331..332, bytes 11243..11275, hits: 0)
+  - Refers to item: Statement (location: source ID 39, lines 331..332, bytes 11243..11275, hits: 3)
 - IC 9790 -> Item 504
 - Creation code
-  - Refers to item: Line (location: source ID 39, lines 332..333, bytes 11289..11308, hits: 0)
+  - Refers to item: Line (location: source ID 39, lines 332..333, bytes 11289..11308, hits: 3)
 - IC 9790 -> Item 505
 - Creation code
-  - Refers to item: Statement (location: source ID 39, lines 332..333, bytes 11289..11308, hits: 0)
+  - Refers to item: Statement (location: source ID 39, lines 332..333, bytes 11289..11308, hits: 3)
 - IC 9798 -> Item 506
 - Creation code
-  - Refers to item: Branch (branch: 34, path: 0) (location: source ID 39, lines 332..335, bytes 11310..11374, hits: 0)
+  - Refers to item: Branch (branch: 34, path: 0) (location: source ID 39, lines 332..335, bytes 11310..11374, hits: 1)
 - IC 9798 -> Item 507
 - Creation code
-  - Refers to item: Line (location: source ID 39, lines 333..334, bytes 11324..11363, hits: 0)
+  - Refers to item: Line (location: source ID 39, lines 333..334, bytes 11324..11363, hits: 1)
 - IC 9798 -> Item 508
 - Creation code
-  - Refers to item: Statement (location: source ID 39, lines 333..334, bytes 11324..11363, hits: 0)
+  - Refers to item: Statement (location: source ID 39, lines 333..334, bytes 11324..11363, hits: 1)
 - IC 2663 -> Item 509
 - Creation code
-  - Refers to item: Line (location: source ID 39, lines 337..346, bytes 11386..11836, hits: 0)
+  - Refers to item: Line (location: source ID 39, lines 337..346, bytes 11386..11836, hits: 2)
 - IC 2663 -> Item 510
 - Creation code
-  - Refers to item: Function "updateVaultParameters" (location: source ID 39, lines 337..346, bytes 11386..11836, hits: 0)
+  - Refers to item: Function "updateVaultParameters" (location: source ID 39, lines 337..346, bytes 11386..11836, hits: 2)
 - IC 8673 -> Item 511
 - Creation code
-  - Refers to item: Line (location: source ID 39, lines 338..339, bytes 11513..11569, hits: 0)
+  - Refers to item: Line (location: source ID 39, lines 338..339, bytes 11513..11569, hits: 2)
 - IC 8673 -> Item 512
 - Creation code
-  - Refers to item: Statement (location: source ID 39, lines 338..339, bytes 11513..11569, hits: 0)
+  - Refers to item: Statement (location: source ID 39, lines 338..339, bytes 11513..11569, hits: 2)
 - IC 8683 -> Item 513
 - Creation code
-  - Refers to item: Branch (branch: 35, path: 0) (location: source ID 39, lines 338..339, bytes 11513..11569, hits: 0)
+  - Refers to item: Branch (branch: 35, path: 0) (location: source ID 39, lines 338..339, bytes 11513..11569, hits: 1)
 - IC 8741 -> Item 514
 - Creation code
-  - Refers to item: Branch (branch: 35, path: 1) (location: source ID 39, lines 338..339, bytes 11513..11569, hits: 0)
+  - Refers to item: Branch (branch: 35, path: 1) (location: source ID 39, lines 338..339, bytes 11513..11569, hits: 1)
 - IC 8742 -> Item 515
 - Creation code
-  - Refers to item: Line (location: source ID 39, lines 340..341, bytes 11588..11708, hits: 0)
+  - Refers to item: Line (location: source ID 39, lines 340..341, bytes 11588..11708, hits: 1)
 - IC 8742 -> Item 516
 - Creation code
-  - Refers to item: Statement (location: source ID 39, lines 340..341, bytes 11588..11708, hits: 0)
+  - Refers to item: Statement (location: source ID 39, lines 340..341, bytes 11588..11708, hits: 1)
 - IC 8813 -> Item 517
 - Creation code
-  - Refers to item: Line (location: source ID 39, lines 342..343, bytes 11719..11748, hits: 0)
+  - Refers to item: Line (location: source ID 39, lines 342..343, bytes 11719..11748, hits: 1)
 - IC 8813 -> Item 518
 - Creation code
-  - Refers to item: Statement (location: source ID 39, lines 342..343, bytes 11719..11748, hits: 0)
+  - Refers to item: Statement (location: source ID 39, lines 342..343, bytes 11719..11748, hits: 1)
 - IC 8820 -> Item 519
 - Creation code
-  - Refers to item: Line (location: source ID 39, lines 343..344, bytes 11758..11789, hits: 0)
+  - Refers to item: Line (location: source ID 39, lines 343..344, bytes 11758..11789, hits: 1)
 - IC 8820 -> Item 520
 - Creation code
-  - Refers to item: Statement (location: source ID 39, lines 343..344, bytes 11758..11789, hits: 0)
+  - Refers to item: Statement (location: source ID 39, lines 343..344, bytes 11758..11789, hits: 1)
 - IC 8827 -> Item 521
 - Creation code
-  - Refers to item: Line (location: source ID 39, lines 344..345, bytes 11799..11829, hits: 0)
+  - Refers to item: Line (location: source ID 39, lines 344..345, bytes 11799..11829, hits: 1)
 - IC 8827 -> Item 522
 - Creation code
-  - Refers to item: Statement (location: source ID 39, lines 344..345, bytes 11799..11829, hits: 0)
+  - Refers to item: Statement (location: source ID 39, lines 344..345, bytes 11799..11829, hits: 1)
 - IC 1974 -> Item 523
 - Creation code
-  - Refers to item: Line (location: source ID 39, lines 347..351, bytes 11842..11972, hits: 2)
+  - Refers to item: Line (location: source ID 39, lines 347..351, bytes 11842..11972, hits: 6)
 - IC 1974 -> Item 524
 - Creation code
-  - Refers to item: Function "pause" (location: source ID 39, lines 347..351, bytes 11842..11972, hits: 2)
+  - Refers to item: Function "pause" (location: source ID 39, lines 347..351, bytes 11842..11972, hits: 6)
 - IC 6377 -> Item 525
 - Creation code
-  - Refers to item: Line (location: source ID 39, lines 348..349, bytes 11888..11896, hits: 2)
+  - Refers to item: Line (location: source ID 39, lines 348..349, bytes 11888..11896, hits: 6)
 - IC 6377 -> Item 526
 - Creation code
-  - Refers to item: Statement (location: source ID 39, lines 348..349, bytes 11888..11896, hits: 2)
+  - Refers to item: Statement (location: source ID 39, lines 348..349, bytes 11888..11896, hits: 6)
 - IC 6385 -> Item 527
 - Creation code
-  - Refers to item: Line (location: source ID 39, lines 349..350, bytes 11906..11965, hits: 2)
+  - Refers to item: Line (location: source ID 39, lines 349..350, bytes 11906..11965, hits: 6)
 - IC 6385 -> Item 528
 - Creation code
-  - Refers to item: Statement (location: source ID 39, lines 349..350, bytes 11906..11965, hits: 2)
+  - Refers to item: Statement (location: source ID 39, lines 349..350, bytes 11906..11965, hits: 6)
 - IC 1410 -> Item 529
 - Creation code
-  - Refers to item: Line (location: source ID 39, lines 352..356, bytes 11978..12114, hits: 1)
+  - Refers to item: Line (location: source ID 39, lines 352..356, bytes 11978..12114, hits: 2)
 - IC 1410 -> Item 530
 - Creation code
-  - Refers to item: Function "unpause" (location: source ID 39, lines 352..356, bytes 11978..12114, hits: 1)
+  - Refers to item: Function "unpause" (location: source ID 39, lines 352..356, bytes 11978..12114, hits: 2)
 - IC 4518 -> Item 531
 - Creation code
-  - Refers to item: Line (location: source ID 39, lines 353..354, bytes 12026..12036, hits: 1)
+  - Refers to item: Line (location: source ID 39, lines 353..354, bytes 12026..12036, hits: 2)
 - IC 4518 -> Item 532
 - Creation code
-  - Refers to item: Statement (location: source ID 39, lines 353..354, bytes 12026..12036, hits: 1)
+  - Refers to item: Statement (location: source ID 39, lines 353..354, bytes 12026..12036, hits: 2)
 - IC 4526 -> Item 533
 - Creation code
-  - Refers to item: Line (location: source ID 39, lines 354..355, bytes 12046..12107, hits: 1)
+  - Refers to item: Line (location: source ID 39, lines 354..355, bytes 12046..12107, hits: 2)
 - IC 4526 -> Item 534
 - Creation code
-  - Refers to item: Statement (location: source ID 39, lines 354..355, bytes 12046..12107, hits: 1)
+  - Refers to item: Statement (location: source ID 39, lines 354..355, bytes 12046..12107, hits: 2)
 - IC 2787 -> Item 535
 - Creation code
-  - Refers to item: Line (location: source ID 39, lines 357..364, bytes 12120..12436, hits: 0)
+  - Refers to item: Line (location: source ID 39, lines 357..364, bytes 12120..12436, hits: 2)
 - IC 2787 -> Item 536
 - Creation code
-  - Refers to item: Function "emergencyWithdraw" (location: source ID 39, lines 357..364, bytes 12120..12436, hits: 0)
+  - Refers to item: Function "emergencyWithdraw" (location: source ID 39, lines 357..364, bytes 12120..12436, hits: 2)
 - IC 8898 -> Item 537
 - Creation code
-  - Refers to item: Line (location: source ID 39, lines 358..359, bytes 12189..12247, hits: 0)
+  - Refers to item: Line (location: source ID 39, lines 358..359, bytes 12189..12247, hits: 1)
 - IC 8898 -> Item 538
 - Creation code
-  - Refers to item: Statement (location: source ID 39, lines 358..359, bytes 12189..12247, hits: 0)
+  - Refers to item: Statement (location: source ID 39, lines 358..359, bytes 12189..12247, hits: 1)
 - IC 8899 -> Item 539
 - Creation code
-  - Refers to item: Statement (location: source ID 39, lines 358..359, bytes 12207..12247, hits: 0)
+  - Refers to item: Statement (location: source ID 39, lines 358..359, bytes 12207..12247, hits: 1)
 - IC 9028 -> Item 540
 - Creation code
-  - Refers to item: Line (location: source ID 39, lines 359..360, bytes 12261..12272, hits: 0)
+  - Refers to item: Line (location: source ID 39, lines 359..360, bytes 12261..12272, hits: 1)
 - IC 9028 -> Item 541
 - Creation code
-  - Refers to item: Statement (location: source ID 39, lines 359..360, bytes 12261..12272, hits: 0)
+  - Refers to item: Statement (location: source ID 39, lines 359..360, bytes 12261..12272, hits: 1)
 - IC 9036 -> Item 542
 - Creation code
-  - Refers to item: Branch (branch: 36, path: 0) (location: source ID 39, lines 359..363, bytes 12274..12430, hits: 0)
+  - Refers to item: Branch (branch: 36, path: 0) (location: source ID 39, lines 359..363, bytes 12274..12430, hits: 1)
 - IC 9036 -> Item 543
 - Creation code
-  - Refers to item: Line (location: source ID 39, lines 360..361, bytes 12288..12334, hits: 0)
+  - Refers to item: Line (location: source ID 39, lines 360..361, bytes 12288..12334, hits: 1)
 - IC 9036 -> Item 544
 - Creation code
-  - Refers to item: Statement (location: source ID 39, lines 360..361, bytes 12288..12334, hits: 0)
+  - Refers to item: Statement (location: source ID 39, lines 360..361, bytes 12288..12334, hits: 1)
 - IC 9093 -> Item 545
 - Creation code
-  - Refers to item: Line (location: source ID 39, lines 361..362, bytes 12348..12419, hits: 0)
+  - Refers to item: Line (location: source ID 39, lines 361..362, bytes 12348..12419, hits: 1)
 - IC 9093 -> Item 546
 - Creation code
-  - Refers to item: Statement (location: source ID 39, lines 361..362, bytes 12348..12419, hits: 0)
-
-Anchors for Contract "safeconsole" (solc 0.8.24, source ID 18):
-
-Anchors for Contract "CommonBase" (solc 0.8.24, source ID 0):
-
-Anchors for Contract "stdStorage" (solc 0.8.24, source ID 9):
+  - Refers to item: Statement (location: source ID 39, lines 361..362, bytes 12348..12419, hits: 1)
 
 Anchors for Contract "stdToml" (solc 0.8.24, source ID 11):
 
-Anchors for Contract "Math" (solc 0.8.24, source ID 36):
-
-Anchors for Contract "IERC20" (solc 0.8.24, source ID 27):
-
-Anchors for Contract "SafeERC20" (solc 0.8.24, source ID 30):
-
-Anchors for Contract "IERC721Errors" (solc 0.8.24, source ID 24):
-
-Anchors for Contract "Pausable" (solc 0.8.24, source ID 33):
-
-Anchors for Contract "IERC1363" (solc 0.8.24, source ID 20):
-
-Anchors for Contract "IStrategy" (solc 0.8.24, source ID 41):
-
-Anchors for Contract "IAaveLendingPool" (solc 0.8.24, source ID 40):
+Anchors for Contract "Vm" (solc 0.8.24, source ID 14):
 

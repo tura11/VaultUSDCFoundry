@@ -25,6 +25,20 @@ contract testVaultUSDC is Test {
         uint256 sharesBurned,
         uint256 timestamp
     );
+    event VaultParametersUpdated(
+        uint256 oldMaxDeposit,
+        uint256 newMaxDeposit,
+        uint256 oldMaxWithdraw,
+        uint256 newMaxWithdraw,
+        uint256 oldManagementFee,
+        uint256 newManagementFee
+    );
+    
+    event EmergencyAction(
+        string actionType,
+        address indexed admin,
+        uint256 timestamp
+    );
 
     MockStrategy strategy;
     ERC20Mock usdc;
@@ -621,5 +635,189 @@ contract testVaultUSDC is Test {
         assertEq(totalValueLocked, expetctedAmountAfterFees);
         assertEq(activeUsers, 1);
         assertEq(feesCollected, 20000e6);
+    }
+    function testCanDepositSuccess() public view {
+    // Nie powinno revertować
+    vault.canDeposit(user, 1000e6);
+}
+
+    function testCanDepositRevertsWhenPaused() public {
+        vm.prank(owner);
+        vault.pause();
+        
+        vm.expectRevert(VaultUSDC.VaultUSDC__VaultPaused.selector);
+        vault.canDeposit(user, 1000e6);
+    }
+
+    function testCanDepositRevertsZeroAmount() public  {
+        vm.expectRevert(VaultUSDC.VaultUSDC__ZeroAmount.selector);
+        vault.canDeposit(user, 0);
+    }
+
+    function testCanDepositRevertsExceedsLimit_View() public  {
+        vm.expectRevert(VaultUSDC.VaultUSDC__DepositExceedsLimit.selector);
+        vault.canDeposit(user, 2000000e6); // powyżej maxDepositLimit
+    }
+
+    function testCanDepositRevertsInvalidUser() public  {
+        vm.expectRevert(VaultUSDC.VaultUSDC__InvalidUserAddress.selector);
+        vault.canDeposit(address(0), 1000e6);
+    }
+
+    // ========== canWithdraw - 4 testy ==========
+
+    function testCanWithdrawSuccess() public {
+        vm.startPrank(user);
+        usdc.approve(address(vault), 10000e6);
+        vault.deposit(10000e6, user);
+        vm.stopPrank();
+        
+        // Nie powinno revertować
+        vault.canWithdraw(user, 1000e6);
+    }
+
+    function testCanWithdrawRevertsWhenPaused() public {
+        vm.startPrank(user);
+        usdc.approve(address(vault), 10000e6);
+        vault.deposit(10000e6, user);
+        vm.stopPrank();
+        
+        vm.prank(owner);
+        vault.pause();
+        
+        vm.expectRevert(VaultUSDC.VaultUSDC__VaultPaused.selector);
+        vault.canWithdraw(user, 1000e6);
+    }
+
+    function testCanWithdrawRevertsZeroAmount() public  {
+        vm.expectRevert(VaultUSDC.VaultUSDC__ZeroAmount.selector);
+        vault.canWithdraw(user, 0);
+    }
+
+   function testCanWithdrawBelowLimit() public {
+    vm.startPrank(user);
+    usdc.approve(address(vault), 1e6);
+    vault.deposit(1e6, user);
+    vm.stopPrank();
+
+    vault.canWithdraw(user, 980_000); 
+    }
+    function testCanWithdrawRevertWithdrawExceedsLimit() public {
+    // given: user ma jakieś środki
+    vm.startPrank(user);
+    usdc.approve(address(vault), 1000000e6);
+    vault.deposit(1000000e6, user);
+    vm.stopPrank();
+
+    vm.expectRevert(VaultUSDC.VaultUSDC__WithdrawExceedsLimit.selector);
+    vault.canWithdraw(user, 1000000e6);
+    }
+
+    function testCanWithdrawRevertsInsufficientBalance() public {
+        vm.startPrank(user);
+        usdc.approve(address(vault), 1000e6);
+        vault.deposit(1000e6, user);
+        vm.stopPrank();
+        
+        vm.expectRevert(VaultUSDC.VaultUSDC__InsufficientBalance.selector);
+        vault.canWithdraw(user, 10000e6); // więcej niż ma
+    }
+
+    // ========== updateVaultParameters - 2 testy ==========
+
+    function testUpdateVaultParametersSuccess() public {
+        uint256 newMaxDeposit = 2000000e6;
+        uint256 newMaxWithdraw = 200000e6;
+        uint256 newFee = 300; // 3%
+        
+        vm.expectEmit(true, true, true, true);
+        emit VaultParametersUpdated(
+            vault.maxDepositLimit(),
+            newMaxDeposit,
+            vault.maxWithdrawLimit(),
+            newMaxWithdraw,
+            vault.managementFee(),
+            newFee
+        );
+        
+        vm.prank(owner);
+        vault.updateVaultParameters(newMaxDeposit, newMaxWithdraw, newFee);
+        
+        assertEq(vault.maxDepositLimit(), newMaxDeposit);
+        assertEq(vault.maxWithdrawLimit(), newMaxWithdraw);
+        assertEq(vault.managementFee(), newFee);
+    }
+
+    function testUpdateVaultParametersRevertsFeeExceeds10Percent() public {
+        vm.prank(owner);
+        vm.expectRevert("Fee cannot exceed 10%");
+        vault.updateVaultParameters(1000000e6, 100000e6, 1001); // 10.01%
+    }
+
+    // ========== pause/unpause - 1 test (łączony) ==========
+
+    function testPauseAndUnpause() public {
+        // Test pause
+        vm.expectEmit(true, true, true, true);
+        emit EmergencyAction("PAUSED", owner, block.timestamp);
+        
+        vm.prank(owner);
+        vault.pause();
+        
+        assertTrue(vault.paused());
+        
+        // Test że deposit nie działa
+        vm.startPrank(user);
+        usdc.approve(address(vault), 1000e6);
+        vm.expectRevert();
+        vault.deposit(1000e6, user);
+        vm.stopPrank();
+        
+        // Test unpause
+        vm.expectEmit(true, true, true, true);
+        emit EmergencyAction("UNPAUSED", owner, block.timestamp);
+        
+        vm.prank(owner);
+        vault.unpause();
+        
+        assertFalse(vault.paused());
+        
+        // Teraz deposit działa
+        vm.startPrank(user);
+        vault.deposit(1000e6, user);
+        vm.stopPrank();
+    }
+
+    // ========== emergencyWithdraw - 2 testy ==========
+
+    function testEmergencyWithdrawSuccess() public {
+        // User deposituje
+        vm.startPrank(user);
+        usdc.approve(address(vault), 100000e6);
+        vault.deposit(100000e6, user);
+        vm.stopPrank();
+        
+        uint256 vaultBalance = usdc.balanceOf(address(vault));
+        uint256 ownerBalanceBefore = usdc.balanceOf(owner);
+        
+        // Owner pauzuje i wypłaca
+        vm.startPrank(owner);
+        vault.pause();
+        
+        vm.expectEmit(true, true, true, true);
+        emit EmergencyAction("EMERGENCY_WITHDRAW", owner, block.timestamp);
+        
+        vault.emergencyWithdraw();
+        vm.stopPrank();
+        
+        // Sprawdź że środki trafiły do ownera
+        assertEq(usdc.balanceOf(owner), ownerBalanceBefore + vaultBalance);
+        assertEq(usdc.balanceOf(address(vault)), 0);
+    }
+
+    function testEmergencyWithdrawRevertsNotPaused() public {
+        vm.prank(owner);
+        vm.expectRevert(); // EnforcedPause
+        vault.emergencyWithdraw();
     }
 }
