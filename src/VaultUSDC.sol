@@ -64,7 +64,7 @@ contract VaultUSDC is ERC4626, Ownable, Pausable, ReentrancyGuard {
     }
 
     constructor(ERC20 _asset) ERC4626(_asset) ERC20("VaultUSDC", "vUSDC") Ownable(msg.sender) {
-        maxDepositLimit = 1000000e6;
+        maxDepositLimit = `;
         maxWithdrawLimit = 100000e6;
         managementFee = 200;
         totalDeposited = 0;
@@ -361,5 +361,6 @@ contract VaultUSDC is ERC4626, Ownable, Pausable, ReentrancyGuard {
             emit EmergencyAction("EMERGENCY_WITHDRAW", msg.sender, block.timestamp);
         }
     }
+    
 
 }
