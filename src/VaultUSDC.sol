@@ -12,7 +12,7 @@ import {IStrategy} from "./interfaces/IStrategy.sol";
 
 /**
  * @title VaultUSDC
- * @author [Your Name/Team]
+ * @author [Tura11]
  * @notice ERC4626 compliant vault for USDC deposits with automated strategy management
  * @dev Implements vault functionality with management fees, deposit/withdraw limits, and automatic rebalancing
  */

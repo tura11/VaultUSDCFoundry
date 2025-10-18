@@ -60,4 +60,11 @@ contract testAaveYieldFarm is Test {
         vm.stopPrank();
         usdc.mint(address(pool), INITIAL_BALANCE);
     }
+
+    function testConstructor() public {
+        assertEq(strategy.getAssetToken(), address(usdc));
+        assertEq(strategy.getLendingPool(), address(pool));
+        assertEq(address(strategy.aToken()), address(aUsdc));
+        assertEq(strategy.vault(), address(vault));
+    }
 }

@@ -208,4 +208,19 @@ contract AaveYieldFarm is IStrategy, Ownable, ReentrancyGuard {
         require(_newVault != address(0), "Invalid vault");
         vault = _newVault;
     }
+    /**
+    * @notice Get asset token address
+    * @return Asset token (USDC)
+    */
+    function getAssetToken() external view returns (address) {
+        return address(assetToken);
+    }
+
+    /**
+    * @notice Get lending pool address
+    * @return Lending pool address
+    */
+    function getLendingPool() external view returns (address) {
+        return address(lendingPool);
+    }
 }
