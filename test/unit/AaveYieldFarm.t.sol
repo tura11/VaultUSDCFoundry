@@ -27,6 +27,7 @@ contract testAaveYieldFarm is Test {
     function setUp() public {
         user = makeAddr("user");
         owner = makeAddr("owner");
+ 
 
        
         usdc = new ERC20Mock();
@@ -67,4 +68,36 @@ contract testAaveYieldFarm is Test {
         assertEq(address(strategy.aToken()), address(aUsdc));
         assertEq(strategy.vault(), address(vault));
     }
+
+    function testDepositRevertsWhenNotVault() public {
+    uint256 amount = 1000e6;
+    
+    // ❌ Owner wywołuje strategy.deposit() bezpośrednio
+    vm.prank(owner);
+    vm.expectRevert(AaveYieldFarm.AaveYieldFarm__OnlyVault.selector);
+    strategy.deposit(amount);
+    
+    // ❌ User wywołuje strategy.deposit() bezpośrednio
+    vm.prank(user);
+    vm.expectRevert(AaveYieldFarm.AaveYieldFarm__OnlyVault.selector);
+    strategy.deposit(amount);
+    }
+
+    function testDepositWorksWhenCalledByVault() public {
+        uint256 amount = 1000e6;
+        
+        // Setup: daj vault środki
+        usdc.mint(address(vault), amount);
+
+        vm.prank(address(vault));
+        usdc.approve(address(strategy), amount);
+        
+        // ✅ Vault wywołuje strategy.deposit()
+        vm.prank(address(vault));
+        uint256 deposited = strategy.deposit(amount);
+        
+        assertEq(deposited, amount);
+        assertGt(strategy.balanceOf(), 0);
+    }
+
 }
