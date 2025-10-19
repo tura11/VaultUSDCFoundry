@@ -9,6 +9,7 @@ import {MockAavePool} from "../mocks/MockAavePool.sol";
 import {MockTokenA} from "../mocks/MockTokenA.sol";
 
 contract testAaveYieldFarm is Test {
+    
     // Kontrakty
     AaveYieldFarm public strategy;
     VaultUSDC public vault;
@@ -23,6 +24,11 @@ contract testAaveYieldFarm is Test {
     address public owner;
 
     uint256 public constant INITIAL_BALANCE = 1_000_000e6;
+
+    event Deposited(uint256 amount, uint256 timestamp);
+    event Withdrawn(uint256 amount, uint256 timestamp);
+    event Harvested(uint256 profit, uint256 timestamp);
+
 
     function setUp() public {
         user = makeAddr("user");
@@ -43,6 +49,7 @@ contract testAaveYieldFarm is Test {
         
    
         vault = new VaultUSDC(usdc);
+        usdc.mint(address(vault), INITIAL_BALANCE);
         
       
         pool = new MockAavePool(address(usdc), address(aUsdc));
@@ -72,12 +79,10 @@ contract testAaveYieldFarm is Test {
     function testDepositRevertsWhenNotVault() public {
     uint256 amount = 1000e6;
     
-    // ❌ Owner wywołuje strategy.deposit() bezpośrednio
     vm.prank(owner);
     vm.expectRevert(AaveYieldFarm.AaveYieldFarm__OnlyVault.selector);
     strategy.deposit(amount);
     
-    // ❌ User wywołuje strategy.deposit() bezpośrednio
     vm.prank(user);
     vm.expectRevert(AaveYieldFarm.AaveYieldFarm__OnlyVault.selector);
     strategy.deposit(amount);
@@ -99,5 +104,26 @@ contract testAaveYieldFarm is Test {
         assertEq(deposited, amount);
         assertGt(strategy.balanceOf(), 0);
     }
+
+
+    function testDepositRevertAaveYieldFarm__ZeroDeposit() public {
+        vm.startPrank(address(vault));
+        usdc.approve(address(strategy), INITIAL_BALANCE);
+        vm.expectRevert(AaveYieldFarm.AaveYieldFarm__ZeroDeposit.selector);
+        strategy.deposit(0);
+        vm.stopPrank();
+    }
+
+    function testDepositEmitEvent() public {
+        vm.startPrank(address(vault));
+        usdc.approve(address(strategy), INITIAL_BALANCE);
+        vm.expectEmit(true, true, false, true);
+        emit Deposited(INITIAL_BALANCE, block.timestamp);
+        strategy.deposit(INITIAL_BALANCE);
+        vm.stopPrank();
+    }
+
+
+
 
 }
