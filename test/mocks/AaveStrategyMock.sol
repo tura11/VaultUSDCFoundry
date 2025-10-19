@@ -9,10 +9,26 @@ import {IStrategy} from "../../src/interfaces/IStrategy.sol";
  * @notice Mock strategy for testing - simulates Aave behavior
  */
 contract MockStrategy is IStrategy {
+
+    error AaveYieldFarm__OnlyVault();
+    error AaveYieldFarm__StrategyInactive();
+
     IERC20 public immutable assetToken;
     address public immutable vault;
     bool public active;
     uint256 public totalDeposited;
+
+
+    modifier onlyVault() {
+        if (msg.sender != vault) revert AaveYieldFarm__OnlyVault();
+        _;
+    }
+
+    modifier whenActive() {
+        if (!active) revert AaveYieldFarm__StrategyInactive();
+        _;
+    }
+
 
     constructor(address _asset, address _vault) {
         assetToken = IERC20(_asset);
@@ -23,8 +39,7 @@ contract MockStrategy is IStrategy {
     /**
      * @notice Mock deposit - just holds the tokens
      */
-    function deposit(uint256 amount) external override returns (uint256) {
-        require(msg.sender == vault, "Only vault");
+    function deposit(uint256 amount) external override onlyVault whenActive returns (uint256) {
         
         // Transfer tokens from vault to strategy
         assetToken.transferFrom(vault, address(this), amount);
@@ -36,8 +51,7 @@ contract MockStrategy is IStrategy {
     /**
      * @notice Mock withdraw - sends tokens back to vault
      */
-    function withdraw(uint256 amount) external override returns (uint256) {
-        require(msg.sender == vault, "Only vault");
+    function withdraw(uint256 amount) external override onlyVault returns (uint256) {
         
         uint256 balance = assetToken.balanceOf(address(this));
         uint256 toWithdraw = amount > balance ? balance : amount;
@@ -57,7 +71,7 @@ contract MockStrategy is IStrategy {
     /**
      * @notice Mock harvest - no yield in mock
      */
-    function harvest() external override returns (uint256) {
+    function harvest() external override onlyVault whenActive returns  (uint256) {
         // Mock strategy doesn't generate yield
         return 0;
     }
