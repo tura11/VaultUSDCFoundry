@@ -337,17 +337,9 @@ vault.emergencyWithdraw();
 - ✅ **Custom Errors**: Gas-efficient error handling
 - ✅ **Input Validation**: Comprehensive parameter checks
 
-### Audits
-
-⚠️ **This project has NOT been audited.** Use at your own risk.
-
 ### Known Issues
 
 - Functions `_rebalanceToStrategy()`, `_withdrawFromStrategy()`, and `_checkAndRebalanceFromStrategy()` are marked as `public` but should be `internal` (for testing purposes)
-
-### Bug Bounty
-
-Currently no bug bounty program. Please report security issues to: [your-email@example.com]
 
 ## ⚡ Gas Optimization
 
@@ -454,9 +446,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 📞 Contact
 
 - **Author**: Tura11
-- **Twitter**: [@yourtwitter](https://twitter.com/yourtwitter)
-- **Discord**: your-discord
-- **Email**: your-email@example.com
+- **Email**: tymek_uramek@wp.pl
+- linkedin https://www.linkedin.com/in/tymoteusz-uramek-0b38b2349/
 
 ## 🗺️ Roadmap
 
