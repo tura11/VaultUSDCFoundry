@@ -222,8 +222,4 @@ contract VaultUSDCFuzzTest is Test {
             return a < b ? a : b;
         }
 
-
-
-
-
 }
