@@ -146,6 +146,78 @@ contract VaultUSDCFuzzTest is Test {
 
     }
 
+
+    function testFuzz_WithdrawProfit(uint256 amount, uint256 profitMultiplier) public {
+        amount = bound(amount, 1e6, MAX_USDC_SUPPLY); 
+        profitMultiplier = bound(profitMultiplier, 1, 5);
+
+        vm.startPrank(user);
+        usdc.approve(address(vault), amount);
+        vault.deposit(amount, user);
+        vm.stopPrank();
+
+      
+        uint256 profitMint = (amount * profitMultiplier) / 10; 
+    
+        profitMint = min(profitMint, vault.maxWithdrawLimit());
+        usdc.mint(address(vault), profitMint);
+
+    
+        uint256 userShares = vault.balanceOf(user);
+        uint256 currentValue = vault.convertToAssets(userShares);
+        uint256 costBasis = vault.userCostBasis(user);
+       
+
+        if (currentValue > costBasis) {
+            uint256 expectedProfit = currentValue - costBasis;
+        
+            expectedProfit = min(expectedProfit, vault.maxWithdrawLimit());
+
+          
+            if (expectedProfit == 0) {
+                return;
+            }
+
+            uint256 balanceBefore = usdc.balanceOf(user);
+
+            vm.startPrank(user);
+            uint256 sharesBurned = vault.withdrawProfit(user);
+            vm.stopPrank();
+
+            
+            assertGt(sharesBurned, 0, "withdrawProfit should burn shares when profit > 0");
+
+           
+            assertApproxEqAbs(usdc.balanceOf(user), balanceBefore + expectedProfit, 1, "Profit not withdrawn");
+        } else {
+      
+            return;
+        }
+    }
+
+
+    function testFUzz_PauseAndEmergencyWithdraw(uint256 amount) public {
+        amount = bound(amount, 1e6, MAX_USDC_SUPPLY);
+
+        vm.startPrank(user);
+        usdc.approve(address(vault), amount);
+        vault.deposit(amount, user);
+        vm.stopPrank();
+
+        vm.startPrank(owner);
+        vault.pause();
+        assertTrue(vault.paused(), "Vault should be paused");
+        uint256 ownerBalanceBefore = usdc.balanceOf(owner);
+        vault.emergencyWithdraw();
+        uint256 ownerBalanceAfter = usdc.balanceOf(owner);
+
+        assertGt(ownerBalanceAfter, ownerBalanceBefore, "Owner should receive vault funds");
+
+        vault.unpause();
+        assertFalse(vault.paused(), "Vault should be unpaused");
+        vm.stopPrank();
+    }
+
     function min(uint256 a, uint256 b) internal pure returns (uint256) {
             return a < b ? a : b;
         }
