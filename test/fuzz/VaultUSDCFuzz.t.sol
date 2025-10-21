@@ -93,41 +93,58 @@ contract VaultUSDCFuzzTest is Test {
 
 
     function testFuzz_Withdraw(uint256 depositAmount, uint256 withdrawAmount) public {
-    // Ogranicz kwotę depozytu do prawidłowego zakresu
-    depositAmount = bound(depositAmount, 1, min(MAX_USDC_SUPPLY, vault.maxDepositLimit()));
+
+        depositAmount = bound(depositAmount, 1, min(MAX_USDC_SUPPLY, vault.maxDepositLimit()));
+        
     
-    // Wykonaj depozyt, aby użytkownik miał udziały
-    vm.startPrank(user);
-    usdc.approve(address(vault), depositAmount);
-    uint256 shares = vault.deposit(depositAmount, user);
-    vm.stopPrank();
+        vm.startPrank(user);
+        usdc.approve(address(vault), depositAmount);
+        uint256 shares = vault.deposit(depositAmount, user);
+        vm.stopPrank();
+        
     
-    // Wykonaj rebalansowanie, aby część środków trafiła do strategii
-    vm.startPrank(owner);
-    vault.rebalance();
-    vm.stopPrank();
+        vm.startPrank(owner);
+        vault.rebalance();
+        vm.stopPrank();
+        
+        
+        uint256 maxWithdrawable = min(vault.maxWithdrawLimit(), vault.convertToAssets(shares));
+        withdrawAmount = bound(withdrawAmount, 1, maxWithdrawable);
+        
     
-    // Ogranicz kwotę wypłaty do dostępnych aktywów i limitu
-    uint256 maxWithdrawable = min(vault.maxWithdrawLimit(), vault.convertToAssets(shares));
-    withdrawAmount = bound(withdrawAmount, 1, maxWithdrawable);
+        vm.startPrank(user);
+        uint256 userBalanceBefore = usdc.balanceOf(user);
+        uint256 userSharesBefore = vault.balanceOf(user);
+        uint256 vaultBalanceBefore = usdc.balanceOf(address(vault));
+        uint256 totalDepositedBefore = vault.totalDeposited();
+        
     
-    // Zapisz salda przed wypłatą
-    vm.startPrank(user);
-    uint256 userBalanceBefore = usdc.balanceOf(user);
-    uint256 userSharesBefore = vault.balanceOf(user);
-    uint256 vaultBalanceBefore = usdc.balanceOf(address(vault));
-    uint256 totalDepositedBefore = vault.totalDeposited();
-    
-    // Wykonaj wypłatę
-    uint256 sharesBurned = vault.withdraw(withdrawAmount, user, user);
-    vm.stopPrank();
-    
-    // Aserty
-    assertEq(vault.balanceOf(user), userSharesBefore - sharesBurned);
-    assertEq(usdc.balanceOf(user), userBalanceBefore + withdrawAmount);
-    assertLe(vault.totalDeposited(), totalDepositedBefore);
-    assertGt(sharesBurned, 0);
-}
+        uint256 sharesBurned = vault.withdraw(withdrawAmount, user, user);
+        vm.stopPrank();
+        
+
+        assertEq(vault.balanceOf(user), userSharesBefore - sharesBurned);
+        assertEq(usdc.balanceOf(user), userBalanceBefore + withdrawAmount);
+        assertLe(vault.totalDeposited(), totalDepositedBefore);
+        assertGt(sharesBurned, 0);
+    }
+
+
+
+    function testFuzz_UpdateVaultParameters(uint256 maxDeposit, uint256 maxWithdraw, uint256 fee) public {
+        maxDeposit = bound(maxDeposit, 1, vault.maxDepositLimit());
+        maxWithdraw = bound(maxWithdraw, 1, vault.maxWithdrawLimit());
+        fee = bound(fee, 0, 1000);
+
+        vm.startPrank(owner);
+        vault.updateVaultParameters(maxDeposit, maxWithdraw, fee);
+        vm.stopPrank();
+
+        assertEq(vault.maxDepositLimit(), maxDeposit);
+        assertEq(vault.maxWithdrawLimit(), maxWithdraw);
+        assertEq(vault.managementFee(), fee);
+
+    }
 
     function min(uint256 a, uint256 b) internal pure returns (uint256) {
             return a < b ? a : b;
