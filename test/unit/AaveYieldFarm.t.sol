@@ -14,23 +14,22 @@ import {MockTokenA} from "../mocks/MockTokenA.sol";
  * @dev Tests all functionality including deposits, withdrawals, harvesting, and edge cases
  */
 contract AaveYieldFarmTest is Test {
-    
     // ============ State Variables ============
-    
+
     AaveYieldFarm public strategy;
     VaultUSDC public vault;
     MockAavePool public pool;
-    
+
     ERC20Mock public usdc;
     MockTokenA public aUsdc;
-    
+
     address public user;
     address public owner;
 
     uint256 public constant INITIAL_BALANCE = 1_000_000e6;
 
     // ============ Events ============
-    
+
     event Deposited(uint256 amount, uint256 timestamp);
     event Withdrawn(uint256 amount, uint256 timestamp);
     event Harvested(uint256 profit, uint256 timestamp);
@@ -45,7 +44,7 @@ contract AaveYieldFarmTest is Test {
     function setUp() public {
         user = makeAddr("user");
         owner = makeAddr("owner");
- 
+
         // Deploy mock tokens
         usdc = new ERC20Mock();
         usdc.mint(owner, INITIAL_BALANCE);
@@ -56,27 +55,27 @@ contract AaveYieldFarmTest is Test {
         aUsdc.mint(user, INITIAL_BALANCE);
 
         vm.startPrank(owner);
-        
+
         // Deploy vault
         vault = new VaultUSDC(usdc);
         usdc.mint(address(vault), INITIAL_BALANCE);
-        
+
         // Deploy mock Aave pool
         pool = new MockAavePool(address(usdc), address(aUsdc));
-        
+
         // Deploy strategy
         strategy = new AaveYieldFarm(
-            address(usdc),   // _asset
-            address(pool),   // _lendingPool
-            address(aUsdc),  // _aToken
-            address(vault)   // _vault
+            address(usdc), // _asset
+            address(pool), // _lendingPool
+            address(aUsdc), // _aToken
+            address(vault) // _vault
         );
-        
+
         // Connect strategy to vault
         vault.setStrategy(address(strategy));
-        
+
         vm.stopPrank();
-        
+
         // Fund the pool for withdrawals
         usdc.mint(address(pool), INITIAL_BALANCE);
     }
@@ -101,11 +100,11 @@ contract AaveYieldFarmTest is Test {
      */
     function testOnlyVaultModifier_RevertsOnDeposit() public {
         uint256 amount = 1000e6;
-        
+
         vm.prank(owner);
         vm.expectRevert(AaveYieldFarm.AaveYieldFarm__OnlyVault.selector);
         strategy.deposit(amount);
-        
+
         vm.prank(user);
         vm.expectRevert(AaveYieldFarm.AaveYieldFarm__OnlyVault.selector);
         strategy.deposit(amount);
@@ -116,11 +115,11 @@ contract AaveYieldFarmTest is Test {
      */
     function testOnlyVaultModifier_RevertsOnWithdraw() public {
         uint256 amount = 1000e6;
-        
+
         vm.prank(owner);
         vm.expectRevert(AaveYieldFarm.AaveYieldFarm__OnlyVault.selector);
         strategy.withdraw(amount);
-        
+
         vm.prank(user);
         vm.expectRevert(AaveYieldFarm.AaveYieldFarm__OnlyVault.selector);
         strategy.withdraw(amount);
@@ -133,7 +132,7 @@ contract AaveYieldFarmTest is Test {
         vm.prank(owner);
         vm.expectRevert(AaveYieldFarm.AaveYieldFarm__OnlyVault.selector);
         strategy.harvest();
-        
+
         vm.prank(user);
         vm.expectRevert(AaveYieldFarm.AaveYieldFarm__OnlyVault.selector);
         strategy.harvest();
@@ -144,19 +143,19 @@ contract AaveYieldFarmTest is Test {
      */
     function testOnlyVaultModifier_AllowsVault() public {
         uint256 amount = 1000e6;
-        
+
         usdc.mint(address(vault), amount);
         vm.prank(address(vault));
         usdc.approve(address(strategy), amount);
-        
+
         // Vault can call deposit
         vm.prank(address(vault));
         strategy.deposit(amount);
-        
+
         // Vault can call withdraw
         vm.prank(address(vault));
         strategy.withdraw(amount);
-        
+
         // Vault can call harvest
         vm.prank(address(vault));
         strategy.harvest();
@@ -169,15 +168,15 @@ contract AaveYieldFarmTest is Test {
      */
     function testWhenActiveModifier_RevertsOnDeposit() public {
         uint256 amount = 1000e6;
-        
+
         // Deactivate strategy
         vm.prank(owner);
         strategy.deactivateStrategy();
-        
+
         usdc.mint(address(vault), amount);
         vm.prank(address(vault));
         usdc.approve(address(strategy), amount);
-        
+
         vm.prank(address(vault));
         vm.expectRevert(AaveYieldFarm.AaveYieldFarm__StrategyInactive.selector);
         strategy.deposit(amount);
@@ -190,7 +189,7 @@ contract AaveYieldFarmTest is Test {
         // Deactivate strategy
         vm.prank(owner);
         strategy.deactivateStrategy();
-        
+
         vm.prank(address(vault));
         vm.expectRevert(AaveYieldFarm.AaveYieldFarm__StrategyInactive.selector);
         strategy.harvest();
@@ -201,18 +200,18 @@ contract AaveYieldFarmTest is Test {
      */
     function testWhenActiveModifier_AllowsWhenActive() public {
         uint256 amount = 1000e6;
-        
+
         // Strategy is active
         assertTrue(strategy.active());
-        
+
         usdc.mint(address(vault), amount);
         vm.prank(address(vault));
         usdc.approve(address(strategy), amount);
-        
+
         // Deposit works when active
         vm.prank(address(vault));
         strategy.deposit(amount);
-        
+
         // Harvest works when active
         vm.prank(address(vault));
         strategy.harvest();
@@ -225,14 +224,14 @@ contract AaveYieldFarmTest is Test {
      */
     function testDepositWorksWhenCalledByVault() public {
         uint256 amount = 1000e6;
-        
+
         usdc.mint(address(vault), amount);
         vm.prank(address(vault));
         usdc.approve(address(strategy), amount);
-        
+
         vm.prank(address(vault));
         uint256 deposited = strategy.deposit(amount);
-        
+
         assertEq(deposited, amount);
         assertGt(strategy.balanceOf(), 0);
         assertEq(strategy.totalDeposited(), amount);
@@ -277,7 +276,7 @@ contract AaveYieldFarmTest is Test {
      */
     function testWithdrawRevertInsufficientBalance() public {
         uint256 amount = 1000e6;
-        
+
         // No deposits made
         vm.prank(address(vault));
         vm.expectRevert(AaveYieldFarm.AaveYieldFarm__InsufficientBalance.selector);
@@ -289,17 +288,17 @@ contract AaveYieldFarmTest is Test {
      */
     function testWithdrawSuccess() public {
         uint256 amount = 1000e6;
-        
+
         // First deposit
         usdc.mint(address(vault), amount);
         vm.startPrank(address(vault));
         usdc.approve(address(strategy), amount);
         strategy.deposit(amount);
-        
+
         // Then withdraw
         uint256 withdrawn = strategy.withdraw(amount);
         vm.stopPrank();
-        
+
         assertEq(withdrawn, amount);
         assertEq(strategy.totalDeposited(), 0);
     }
@@ -310,19 +309,19 @@ contract AaveYieldFarmTest is Test {
     function testWithdrawUpdatesTotalDepositedNormally() public {
         uint256 depositAmount = 1000e6;
         uint256 withdrawAmount = 400e6;
-        
+
         // Setup: deposit
         usdc.mint(address(vault), depositAmount);
         vm.startPrank(address(vault));
         usdc.approve(address(strategy), depositAmount);
         strategy.deposit(depositAmount);
-        
+
         // Check initial state
         assertEq(strategy.totalDeposited(), depositAmount);
-        
+
         // Withdraw less than deposited
         strategy.withdraw(withdrawAmount);
-        
+
         // totalDeposited >= withdrawn: totalDeposited -= withdrawn
         assertEq(strategy.totalDeposited(), depositAmount - withdrawAmount);
         vm.stopPrank();
@@ -335,26 +334,26 @@ contract AaveYieldFarmTest is Test {
     function testWithdrawSetsToZeroWhenWithdrawnExceedsTotalDeposited() public {
         uint256 depositAmount = 1000e6;
         uint256 yield = 500e6;
-        
+
         // Setup: deposit
         usdc.mint(address(vault), depositAmount);
         vm.startPrank(address(vault));
         usdc.approve(address(strategy), depositAmount);
         strategy.deposit(depositAmount);
         vm.stopPrank();
-        
+
         // Simulate yield - mint more aTokens to strategy
         // Now balanceOf() > totalDeposited
         aUsdc.mint(address(strategy), yield);
-        
+
         // Check state before withdraw
         assertEq(strategy.totalDeposited(), depositAmount);
         assertEq(strategy.balanceOf(), depositAmount + yield);
-        
+
         // Withdraw everything (deposit + yield)
         vm.prank(address(vault));
         uint256 withdrawn = strategy.withdraw(depositAmount + yield);
-        
+
         // withdrawn (1500e6) > totalDeposited (1000e6)
         // so totalDeposited = 0
         assertEq(withdrawn, depositAmount + yield);
@@ -366,25 +365,25 @@ contract AaveYieldFarmTest is Test {
      */
     function testWithdrawMultipleTimesUntilZero() public {
         uint256 depositAmount = 1000e6;
-        
+
         // Setup: deposit
         usdc.mint(address(vault), depositAmount);
         vm.startPrank(address(vault));
         usdc.approve(address(strategy), depositAmount);
         strategy.deposit(depositAmount);
-        
+
         // First withdraw - normal path
         strategy.withdraw(400e6);
         assertEq(strategy.totalDeposited(), 600e6);
-        
+
         // Second withdraw - normal path
         strategy.withdraw(300e6);
         assertEq(strategy.totalDeposited(), 300e6);
-        
+
         // Third withdraw - normal path, exactly zero
         strategy.withdraw(300e6);
         assertEq(strategy.totalDeposited(), 0);
-        
+
         vm.stopPrank();
     }
 
@@ -395,25 +394,25 @@ contract AaveYieldFarmTest is Test {
     function testWithdrawWithYieldExceedingDeposit() public {
         uint256 depositAmount = 100e6;
         uint256 massiveYield = 10000e6;
-        
+
         // Setup: deposit
         usdc.mint(address(vault), depositAmount);
         vm.startPrank(address(vault));
         usdc.approve(address(strategy), depositAmount);
         strategy.deposit(depositAmount);
         vm.stopPrank();
-        
+
         // Simulate massive yield
         aUsdc.mint(address(strategy), massiveYield);
         usdc.mint(address(pool), massiveYield); // Pool needs funds for withdrawal
-        
+
         uint256 totalBalance = strategy.balanceOf();
         assertEq(totalBalance, depositAmount + massiveYield);
-        
+
         // Withdraw everything
         vm.prank(address(vault));
         strategy.withdraw(totalBalance);
-        
+
         // totalDeposited < withdrawn, so totalDeposited = 0
         assertEq(strategy.totalDeposited(), 0);
     }
@@ -423,12 +422,12 @@ contract AaveYieldFarmTest is Test {
      */
     function testWithdrawEmitEvent() public {
         uint256 amount = 1000e6;
-        
+
         usdc.mint(address(vault), amount);
         vm.startPrank(address(vault));
         usdc.approve(address(strategy), amount);
         strategy.deposit(amount);
-        
+
         vm.expectEmit(true, true, false, true);
         emit Withdrawn(amount, block.timestamp);
         strategy.withdraw(amount);
@@ -442,15 +441,15 @@ contract AaveYieldFarmTest is Test {
      */
     function testHarvestNoProfit() public {
         uint256 amount = 1000e6;
-        
+
         usdc.mint(address(vault), amount);
         vm.startPrank(address(vault));
         usdc.approve(address(strategy), amount);
         strategy.deposit(amount);
-        
+
         uint256 profit = strategy.harvest();
         vm.stopPrank();
-        
+
         assertEq(profit, 0);
     }
 
@@ -460,19 +459,19 @@ contract AaveYieldFarmTest is Test {
     function testHarvestWithProfit() public {
         uint256 amount = 1000e6;
         uint256 yield = 100e6;
-        
+
         usdc.mint(address(vault), amount);
         vm.startPrank(address(vault));
         usdc.approve(address(strategy), amount);
         strategy.deposit(amount);
         vm.stopPrank();
-        
+
         // Simulate yield by minting aTokens
         aUsdc.mint(address(strategy), yield);
-        
+
         vm.prank(address(vault));
         uint256 profit = strategy.harvest();
-        
+
         assertEq(profit, yield);
     }
 
@@ -481,12 +480,12 @@ contract AaveYieldFarmTest is Test {
      */
     function testHarvestEmitEvent() public {
         uint256 amount = 1000e6;
-        
+
         usdc.mint(address(vault), amount);
         vm.startPrank(address(vault));
         usdc.approve(address(strategy), amount);
         strategy.deposit(amount);
-        
+
         vm.expectEmit(true, true, false, true);
         emit Harvested(0, block.timestamp);
         strategy.harvest();
@@ -500,15 +499,15 @@ contract AaveYieldFarmTest is Test {
      */
     function testBalanceOf() public {
         uint256 amount = 1000e6;
-        
+
         assertEq(strategy.balanceOf(), 0);
-        
+
         usdc.mint(address(vault), amount);
         vm.startPrank(address(vault));
         usdc.approve(address(strategy), amount);
         strategy.deposit(amount);
         vm.stopPrank();
-        
+
         assertGt(strategy.balanceOf(), 0);
     }
 
@@ -524,10 +523,10 @@ contract AaveYieldFarmTest is Test {
      */
     function testIsActive() public {
         assertTrue(strategy.isActive());
-        
+
         vm.prank(owner);
         strategy.deactivateStrategy();
-        
+
         assertFalse(strategy.isActive());
     }
 
@@ -538,11 +537,11 @@ contract AaveYieldFarmTest is Test {
      */
     function testActivateDeactivate() public {
         assertTrue(strategy.active());
-        
+
         vm.prank(owner);
         strategy.deactivateStrategy();
         assertFalse(strategy.active());
-        
+
         vm.prank(owner);
         strategy.activateStrategy();
         assertTrue(strategy.active());
@@ -553,10 +552,10 @@ contract AaveYieldFarmTest is Test {
      */
     function testUpdateVault() public {
         address newVault = makeAddr("newVault");
-        
+
         vm.prank(owner);
         strategy.updateVault(newVault);
-        
+
         assertEq(strategy.vault(), newVault);
     }
 
@@ -574,19 +573,19 @@ contract AaveYieldFarmTest is Test {
      */
     function testEmergencyWithdraw() public {
         uint256 amount = 1000e6;
-        
+
         usdc.mint(address(vault), amount);
         vm.startPrank(address(vault));
         usdc.approve(address(strategy), amount);
         strategy.deposit(amount);
         vm.stopPrank();
-        
+
         uint256 balanceBefore = strategy.balanceOf();
         assertGt(balanceBefore, 0);
-        
+
         vm.prank(owner);
         strategy.emergencyWithdraw();
-        
+
         assertEq(strategy.balanceOf(), 0);
         assertFalse(strategy.active());
     }
@@ -596,15 +595,15 @@ contract AaveYieldFarmTest is Test {
      */
     function testEmergencyWithdrawEmitsEvent() public {
         uint256 amount = 1000e6;
-        
+
         usdc.mint(address(vault), amount);
         vm.startPrank(address(vault));
         usdc.approve(address(strategy), amount);
         strategy.deposit(amount);
         vm.stopPrank();
-        
+
         uint256 balance = strategy.balanceOf();
-        
+
         vm.prank(owner);
         vm.expectEmit(true, true, false, true);
         emit EmergencyWithdrawal(balance, block.timestamp);
@@ -616,10 +615,10 @@ contract AaveYieldFarmTest is Test {
      */
     function testEmergencyWithdrawZeroBalance() public {
         assertEq(strategy.balanceOf(), 0);
-        
+
         vm.prank(owner);
         strategy.emergencyWithdraw();
-        
+
         assertEq(strategy.balanceOf(), 0);
         assertFalse(strategy.active());
     }

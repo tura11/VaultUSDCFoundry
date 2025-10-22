@@ -11,5 +11,4 @@ interface IStrategy {
     function asset() external view returns (address);
     function isActive() external view returns (bool);
     function emergencyWithdraw() external;
-
 }

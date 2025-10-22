@@ -9,7 +9,6 @@ import {IStrategy} from "../../src/interfaces/IStrategy.sol";
  * @notice Mock strategy for testing - simulates Aave behavior
  */
 contract MockStrategy is IStrategy {
-
     error AaveYieldFarm__OnlyVault();
     error AaveYieldFarm__StrategyInactive();
 
@@ -17,7 +16,6 @@ contract MockStrategy is IStrategy {
     address public immutable vault;
     bool public active;
     uint256 public totalDeposited;
-
 
     modifier onlyVault() {
         if (msg.sender != vault) revert AaveYieldFarm__OnlyVault();
@@ -29,7 +27,6 @@ contract MockStrategy is IStrategy {
         _;
     }
 
-
     constructor(address _asset, address _vault) {
         assetToken = IERC20(_asset);
         vault = _vault;
@@ -40,10 +37,9 @@ contract MockStrategy is IStrategy {
      * @notice Mock deposit - just holds the tokens
      */
     function deposit(uint256 amount) external override onlyVault whenActive returns (uint256) {
-        
         // Transfer tokens from vault to strategy
         assetToken.transferFrom(vault, address(this), amount);
-        
+
         totalDeposited += amount;
         return amount;
     }
@@ -52,26 +48,25 @@ contract MockStrategy is IStrategy {
      * @notice Mock withdraw - sends tokens back to vault
      */
     function withdraw(uint256 amount) external override onlyVault returns (uint256) {
-        
         uint256 balance = assetToken.balanceOf(address(this));
         uint256 toWithdraw = amount > balance ? balance : amount;
-        
+
         // Transfer back to vault
         assetToken.transfer(vault, toWithdraw);
-        
+
         if (totalDeposited >= toWithdraw) {
             totalDeposited -= toWithdraw;
         } else {
             totalDeposited = 0;
         }
-        
+
         return toWithdraw;
     }
 
     /**
      * @notice Mock harvest - no yield in mock
      */
-    function harvest() external override onlyVault whenActive returns  (uint256) {
+    function harvest() external override onlyVault whenActive returns (uint256) {
         // Mock strategy doesn't generate yield
         return 0;
     }

@@ -9,7 +9,6 @@ import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
 contract AaveYieldFarm is IStrategy, Ownable, ReentrancyGuard {
-
     using SafeERC20 for IERC20;
 
     error AaveYieldFarm__ZeroDeposit();
@@ -17,18 +16,19 @@ contract AaveYieldFarm is IStrategy, Ownable, ReentrancyGuard {
     error AaveYieldFarm__InsufficientBalance();
     error AaveYieldFarm__OnlyVault();
     error AaveYieldFarm__StrategyInactive();
+
     event Deposited(uint256 amount, uint256 timestamp);
     event Withdrawn(uint256 amount, uint256 timestamp);
     event Harvested(uint256 profit, uint256 timestamp);
     event EmergencyWithdrawal(uint256 amount, uint256 timestamp);
 
-    IERC20 public immutable assetToken; 
+    IERC20 public immutable assetToken;
     IAaveLendingPool public immutable lendingPool;
     address public vault;
     IERC20 public aToken; // aUSDC
     bool public active;
 
-    uint256 public totalDeposited; 
+    uint256 public totalDeposited;
 
     modifier onlyVault() {
         if (msg.sender != vault) revert AaveYieldFarm__OnlyVault();
@@ -40,12 +40,7 @@ contract AaveYieldFarm is IStrategy, Ownable, ReentrancyGuard {
         _;
     }
 
-    constructor(
-        address _asset, 
-        address _lendingPool, 
-        address _aToken, 
-        address _vault
-    ) Ownable(msg.sender) { 
+    constructor(address _asset, address _lendingPool, address _aToken, address _vault) Ownable(msg.sender) {
         assetToken = IERC20(_asset);
         lendingPool = IAaveLendingPool(_lendingPool);
         aToken = IERC20(_aToken);
@@ -61,15 +56,8 @@ contract AaveYieldFarm is IStrategy, Ownable, ReentrancyGuard {
      * @param amount Amount to deposit
      * @return Amount deposited
      */
-    function deposit(uint256 amount) 
-        external 
-        override 
-        onlyVault 
-        whenActive 
-        nonReentrant 
-        returns (uint256) 
-    {
-        if(amount == 0) revert AaveYieldFarm__ZeroDeposit();
+    function deposit(uint256 amount) external override onlyVault whenActive nonReentrant returns (uint256) {
+        if (amount == 0) revert AaveYieldFarm__ZeroDeposit();
 
         assetToken.safeTransferFrom(vault, address(this), amount);
 
@@ -81,7 +69,7 @@ contract AaveYieldFarm is IStrategy, Ownable, ReentrancyGuard {
 
         emit Deposited(amount, block.timestamp);
 
-        return amount; 
+        return amount;
     }
 
     /**
@@ -89,13 +77,7 @@ contract AaveYieldFarm is IStrategy, Ownable, ReentrancyGuard {
      * @param amount Amount to withdraw
      * @return Amount withdrawn
      */
-    function withdraw(uint256 amount) 
-        external 
-        override 
-        onlyVault 
-        nonReentrant 
-        returns (uint256) 
-    {
+    function withdraw(uint256 amount) external override onlyVault nonReentrant returns (uint256) {
         if (amount == 0) revert AaveYieldFarm__ZeroAmount();
 
         uint256 available = balanceOf();
@@ -118,15 +100,9 @@ contract AaveYieldFarm is IStrategy, Ownable, ReentrancyGuard {
      * @notice Harvest yield from Aave
      * @return Profit harvested
      */
-    function harvest() 
-        external 
-        override 
-        onlyVault 
-        whenActive 
-        returns (uint256) 
-    {
+    function harvest() external override onlyVault whenActive returns (uint256) {
         uint256 currentBalance = balanceOf();
-        
+
         // Profit = current balance - what we deposited
         uint256 profit = 0;
         if (currentBalance > totalDeposited) {
@@ -169,16 +145,11 @@ contract AaveYieldFarm is IStrategy, Ownable, ReentrancyGuard {
     /**
      * @notice Emergency withdraw all funds
      */
-    function emergencyWithdraw() 
-        external 
-        override 
-        onlyOwner 
-        nonReentrant 
-    {
+    function emergencyWithdraw() external override onlyOwner nonReentrant {
         active = false;
 
         uint256 balance = balanceOf();
-        
+
         if (balance > 0) {
             // Withdraw everything from Aave to vault
             lendingPool.withdraw(address(assetToken), type(uint256).max, vault);
@@ -209,17 +180,18 @@ contract AaveYieldFarm is IStrategy, Ownable, ReentrancyGuard {
         vault = _newVault;
     }
     /**
-    * @notice Get asset token address
-    * @return Asset token (USDC)
-    */
+     * @notice Get asset token address
+     * @return Asset token (USDC)
+     */
+
     function getAssetToken() external view returns (address) {
         return address(assetToken);
     }
 
     /**
-    * @notice Get lending pool address
-    * @return Lending pool address
-    */
+     * @notice Get lending pool address
+     * @return Lending pool address
+     */
     function getLendingPool() external view returns (address) {
         return address(lendingPool);
     }

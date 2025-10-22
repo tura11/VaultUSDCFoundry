@@ -53,13 +53,9 @@ contract testVaultUSDC is Test {
         uint256 oldManagementFee,
         uint256 newManagementFee
     );
-    
+
     /// @notice Emitted for emergency actions (PAUSED / UNPAUSED / EMERGENCY_WITHDRAW) (test-only)
-    event EmergencyAction(
-        string actionType,
-        address indexed admin,
-        uint256 timestamp
-    );
+    event EmergencyAction(string actionType, address indexed admin, uint256 timestamp);
 
     // ---------------------------
     // Test state variables
@@ -213,14 +209,7 @@ contract testVaultUSDC is Test {
         usdc.approve(address(vault), depositAmount);
 
         vm.expectEmit(true, true, false, true);
-        emit DepositExecuted(
-            user,
-            user,
-            depositAmount,
-            expectedShares,
-            expectedFee,
-            block.timestamp
-        );
+        emit DepositExecuted(user, user, depositAmount, expectedShares, expectedFee, block.timestamp);
 
         vault.deposit(depositAmount, user);
         vm.stopPrank();
@@ -336,6 +325,7 @@ contract testVaultUSDC is Test {
         assertEq(vault.totalDeposited(), 0, "totalDeposited should be 0");
     }
     /// @notice Revert when caller has no shares (cover VaultUSDC__NoShares branch)
+
     function testWithdrawProfitRevertsWhenNoSharesCover() public {
         address noHolder = makeAddr("noHolder");
 
@@ -344,7 +334,6 @@ contract testVaultUSDC is Test {
         vm.expectRevert(VaultUSDC.VaultUSDC__NoShares.selector);
         vault.withdrawProfit(noHolder);
     }
-
 
     /**
      * @notice Withdraw should emit WithdrawalExecuted with correct parameters.
@@ -361,14 +350,7 @@ contract testVaultUSDC is Test {
         uint256 expectedSharesBurned = vault.previewWithdraw(withdrawAmount);
 
         vm.expectEmit(true, true, true, true);
-        emit WithdrawalExecuted(
-            user,
-            user,
-            user,
-            withdrawAmount,
-            expectedSharesBurned,
-            block.timestamp
-        );
+        emit WithdrawalExecuted(user, user, user, withdrawAmount, expectedSharesBurned, block.timestamp);
 
         vault.withdraw(withdrawAmount, user, user);
         vm.stopPrank();
@@ -863,7 +845,7 @@ contract testVaultUSDC is Test {
      * @notice canDeposit should revert when amount is zero.
      * @dev Expects VaultUSDC__ZeroAmount on zero deposit query.
      */
-    function testCanDepositRevertsZeroAmount() public  {
+    function testCanDepositRevertsZeroAmount() public {
         vm.expectRevert(VaultUSDC.VaultUSDC__ZeroAmount.selector);
         vault.canDeposit(user, 0);
     }
@@ -872,7 +854,7 @@ contract testVaultUSDC is Test {
      * @notice canDeposit should revert when requested deposit exceeds maxDepositLimit.
      * @dev Expects VaultUSDC__DepositExceedsLimit when querying a large amount.
      */
-    function testCanDepositRevertsExceedsLimit_View() public  {
+    function testCanDepositRevertsExceedsLimit_View() public {
         vm.expectRevert(VaultUSDC.VaultUSDC__DepositExceedsLimit.selector);
         vault.canDeposit(user, 2000000e6);
     }
@@ -881,7 +863,7 @@ contract testVaultUSDC is Test {
      * @notice canDeposit should revert when user address is invalid (zero address).
      * @dev Expects VaultUSDC__InvalidUserAddress when passing address(0).
      */
-    function testCanDepositRevertsInvalidUser() public  {
+    function testCanDepositRevertsInvalidUser() public {
         vm.expectRevert(VaultUSDC.VaultUSDC__InvalidUserAddress.selector);
         vault.canDeposit(address(0), 1000e6);
     }
@@ -924,7 +906,7 @@ contract testVaultUSDC is Test {
      * @notice canWithdraw should revert when amount is zero.
      * @dev Expects VaultUSDC__ZeroAmount revert on zero withdrawal query.
      */
-    function testCanWithdrawRevertsZeroAmount() public  {
+    function testCanWithdrawRevertsZeroAmount() public {
         vm.expectRevert(VaultUSDC.VaultUSDC__ZeroAmount.selector);
         vault.canWithdraw(user, 0);
     }
@@ -1048,5 +1030,4 @@ contract testVaultUSDC is Test {
         vault.deposit(1000e6, user);
         vm.stopPrank();
     }
-
 }

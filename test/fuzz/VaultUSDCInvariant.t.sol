@@ -10,7 +10,6 @@ import {ERC20Mock} from "@openzeppelin/contracts/mocks/token/ERC20Mock.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {MockTokenA} from "../mocks/MockTokenA.sol";
 
-
 contract VaultUSDCInvariantTest is Test {
     VaultUSDC public vault;
     AaveYieldFarm public strategy;
@@ -93,7 +92,6 @@ contract VaultUSDCInvariantTest is Test {
         assertLe(user3Assets, totalAssets, "User3 assets exceed total assets");
     }
 
-
     // Inwariant: Strategia nie przechowuje więcej, niż zdeponowano (chyba że symulujemy zyski)
     function invariant_strategyBalance() public {
         uint256 strategyBalance = strategy.balanceOf();
@@ -101,7 +99,6 @@ contract VaultUSDCInvariantTest is Test {
         // Zyski mogą zwiększyć saldo, więc sprawdzamy czy saldo jest zgodne
         assertLe(totalDepositedToStrategy, strategyBalance, "Strategy deposited exceeds balance");
     }
-
 }
 
 contract VaultHandler is Test {

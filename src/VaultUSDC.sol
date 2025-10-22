@@ -17,7 +17,6 @@ import {IStrategy} from "./interfaces/IStrategy.sol";
  * @dev Implements vault functionality with management fees, deposit/withdraw limits, and automatic rebalancing
  */
 contract VaultUSDC is ERC4626, Ownable, Pausable, ReentrancyGuard {
-
     using SafeERC20 for IERC20;
 
     // Custom Errors
@@ -30,7 +29,7 @@ contract VaultUSDC is ERC4626, Ownable, Pausable, ReentrancyGuard {
     error VaultUSDC__VaultPaused();
     error VaultUSDC__InvalidUserAddress();
     error VaultUSDC__NoStrategySet();
-    error VaultUSDC__InsufficientStrategyLiquidity(); 
+    error VaultUSDC__InsufficientStrategyLiquidity();
     error VaultUSDC__NoShares();
 
     /**
@@ -42,8 +41,15 @@ contract VaultUSDC is ERC4626, Ownable, Pausable, ReentrancyGuard {
      * @param managementFeeCharged Fee amount charged for the deposit
      * @param timestamp Block timestamp of the deposit
      */
-    event DepositExecuted(address indexed user, address indexed receiver, uint256 assetsDeposited, uint256 sharesReceived, uint256 managementFeeCharged, uint256 timestamp);
-    
+    event DepositExecuted(
+        address indexed user,
+        address indexed receiver,
+        uint256 assetsDeposited,
+        uint256 sharesReceived,
+        uint256 managementFeeCharged,
+        uint256 timestamp
+    );
+
     /**
      * @notice Emitted when assets are withdrawn from the vault
      * @param user Address that initiated the withdrawal
@@ -53,8 +59,15 @@ contract VaultUSDC is ERC4626, Ownable, Pausable, ReentrancyGuard {
      * @param sharesBurned Amount of shares burned
      * @param timestamp Block timestamp of the withdrawal
      */
-    event WithdrawalExecuted(address indexed user, address indexed receiver, address indexed shareOwner, uint256 assetsWithdrawn, uint256 sharesBurned, uint256 timestamp);
-    
+    event WithdrawalExecuted(
+        address indexed user,
+        address indexed receiver,
+        address indexed shareOwner,
+        uint256 assetsWithdrawn,
+        uint256 sharesBurned,
+        uint256 timestamp
+    );
+
     /**
      * @notice Emitted when vault parameters are updated
      * @param oldMaxDeposit Previous maximum deposit limit
@@ -64,8 +77,15 @@ contract VaultUSDC is ERC4626, Ownable, Pausable, ReentrancyGuard {
      * @param oldManagementFee Previous management fee in basis points
      * @param newManagementFee New management fee in basis points
      */
-    event VaultParametersUpdated(uint256 oldMaxDeposit, uint256 newMaxDeposit, uint256 oldMaxWithdraw, uint256 newMaxWithdraw, uint256 oldManagementFee, uint256 newManagementFee);
-    
+    event VaultParametersUpdated(
+        uint256 oldMaxDeposit,
+        uint256 newMaxDeposit,
+        uint256 oldMaxWithdraw,
+        uint256 newMaxWithdraw,
+        uint256 oldManagementFee,
+        uint256 newManagementFee
+    );
+
     /**
      * @notice Emitted when an emergency action is performed
      * @param actionType Description of the emergency action
@@ -76,22 +96,22 @@ contract VaultUSDC is ERC4626, Ownable, Pausable, ReentrancyGuard {
 
     /// @notice Maximum amount that can be deposited in a single transaction (in asset decimals)
     uint256 public maxDepositLimit;
-    
+
     /// @notice Maximum amount that can be withdrawn in a single transaction (in asset decimals)
     uint256 public maxWithdrawLimit;
-    
+
     /// @notice Management fee charged on deposits in basis points (e.g., 200 = 2%)
     uint256 public managementFee;
-    
+
     /// @notice Total amount of assets deposited (excluding fees)
     uint256 public totalDeposited;
-    
+
     /// @notice Total management fees collected by the vault
     uint256 public totalFeesCollected;
-    
+
     /// @notice Total number of unique users who have deposited
     uint256 public totalUsers;
-    
+
     /// @notice Target liquidity to maintain in vault in basis points (e.g., 1500 = 15%)
     uint256 public targetLiquidityBPS = 1500; // 15%
 
@@ -103,15 +123,15 @@ contract VaultUSDC is ERC4626, Ownable, Pausable, ReentrancyGuard {
 
     /// @notice Timestamp of user's first deposit
     mapping(address => uint256) public userFirstDepositTime;
-    
+
     /// @notice Total amount deposited by user (excluding fees)
     mapping(address => uint256) public userTotalDeposited;
-    
+
     /// @notice Total amount withdrawn by user
     mapping(address => uint256) public userTotalWithdrawn;
-    
+
     /// @notice User's cost basis for profit calculation
-    mapping(address => uint256) public userCostBasis; 
+    mapping(address => uint256) public userCostBasis;
 
     /**
      * @notice Validates that the provided amount is not zero
@@ -152,7 +172,15 @@ contract VaultUSDC is ERC4626, Ownable, Pausable, ReentrancyGuard {
      * @return shares Amount of shares minted
      * @dev Charges management fee on deposit, updates user tracking, and rebalances to strategy
      */
-    function deposit(uint256 assets, address receiver) public override nonReentrant whenNotPaused validAmount(assets) validAddress(receiver) returns (uint256) {
+    function deposit(uint256 assets, address receiver)
+        public
+        override
+        nonReentrant
+        whenNotPaused
+        validAmount(assets)
+        validAddress(receiver)
+        returns (uint256)
+    {
         if (assets > maxDepositLimit) {
             revert VaultUSDC__DepositExceedsLimit();
         }
@@ -172,7 +200,7 @@ contract VaultUSDC is ERC4626, Ownable, Pausable, ReentrancyGuard {
             totalUsers++;
             userFirstDepositTime[receiver] = block.timestamp;
         }
-        
+
         userCostBasis[receiver] += assetsAfterFee;
         userTotalDeposited[receiver] += assetsAfterFee;
         totalDeposited += assetsAfterFee;
@@ -204,7 +232,7 @@ contract VaultUSDC is ERC4626, Ownable, Pausable, ReentrancyGuard {
 
         uint256 targetLiquidity = (total * targetLiquidityBPS) / 10000;
 
-        if(vaultBalance > targetLiquidity) {
+        if (vaultBalance > targetLiquidity) {
             uint256 toSend = vaultBalance - targetLiquidity;
             IERC20(asset()).approve(strategy, toSend);
             IStrategy(strategy).deposit(toSend);
@@ -219,7 +247,15 @@ contract VaultUSDC is ERC4626, Ownable, Pausable, ReentrancyGuard {
      * @return shares Amount of shares burned
      * @dev Pulls funds from strategy if vault balance is insufficient, updates user tracking
      */
-    function withdraw(uint256 assets, address receiver, address shareOwner) public override nonReentrant whenNotPaused validAmount(assets) validAddress(receiver) returns (uint256) {
+    function withdraw(uint256 assets, address receiver, address shareOwner)
+        public
+        override
+        nonReentrant
+        whenNotPaused
+        validAmount(assets)
+        validAddress(receiver)
+        returns (uint256)
+    {
         if (assets > maxWithdrawLimit) {
             revert VaultUSDC__WithdrawExceedsLimit();
         }
@@ -228,14 +264,14 @@ contract VaultUSDC is ERC4626, Ownable, Pausable, ReentrancyGuard {
         uint256 shares = previewWithdraw(assets);
 
         // Check allowance if caller is not the share owner
-        if(msg.sender != shareOwner) {
+        if (msg.sender != shareOwner) {
             _spendAllowance(shareOwner, msg.sender, shares);
         }
 
         // Withdraw from strategy if vault doesn't have enough liquidity
         uint256 vaultBalance = IERC20(asset()).balanceOf(address(this));
 
-        if (assets > vaultBalance) { 
+        if (assets > vaultBalance) {
             uint256 needed = assets - vaultBalance;
             _withdrawFromStrategy(needed);
         }
@@ -249,7 +285,7 @@ contract VaultUSDC is ERC4626, Ownable, Pausable, ReentrancyGuard {
         } else {
             totalDeposited = 0;
         }
-        
+
         _updateCostBasisOnWithdraw(shareOwner, shares);
         userTotalWithdrawn[shareOwner] += assets;
 
@@ -268,16 +304,16 @@ contract VaultUSDC is ERC4626, Ownable, Pausable, ReentrancyGuard {
      * @dev WARNING: This function should be internal, not public
      */
     function _withdrawFromStrategy(uint256 amount) public {
-        if(strategy == address(0)) {
+        if (strategy == address(0)) {
             revert VaultUSDC__NoStrategySet();
         }
 
         uint256 withdrawn = IStrategy(strategy).withdraw(amount);
-        
+
         if (withdrawn < amount) {
-            revert VaultUSDC__InsufficientStrategyLiquidity(); 
+            revert VaultUSDC__InsufficientStrategyLiquidity();
         }
-    } 
+    }
 
     /**
      * @notice Checks if vault liquidity is below threshold and rebalances from strategy
@@ -291,16 +327,16 @@ contract VaultUSDC is ERC4626, Ownable, Pausable, ReentrancyGuard {
 
         uint256 vaultBalance = IERC20(asset()).balanceOf(address(this));
         uint256 total = totalAssets();
-        
+
         if (total == 0) return;
-        
+
         uint256 currentRatio = (vaultBalance * 10000) / total;
         uint256 minRatio = targetLiquidityBPS - REBALANCE_THRESHOLD_BPS; // 10%
-        
+
         if (currentRatio < minRatio) {
             uint256 targetAmount = (total * targetLiquidityBPS) / 10000;
             uint256 toWithdraw = targetAmount - vaultBalance;
-            
+
             if (toWithdraw > 0) {
                 try IStrategy(strategy).withdraw(toWithdraw) {
                     // Successfully withdrew from strategy
@@ -319,7 +355,7 @@ contract VaultUSDC is ERC4626, Ownable, Pausable, ReentrancyGuard {
      */
     function _updateCostBasisOnWithdraw(address user, uint256 sharesBurned) internal {
         uint256 remainingShares = balanceOf(user);
-        
+
         if (remainingShares == 0) {
             userCostBasis[user] = 0;
         } else {
@@ -335,16 +371,16 @@ contract VaultUSDC is ERC4626, Ownable, Pausable, ReentrancyGuard {
      * @return shares Amount of shares burned
      * @dev Compares current value to cost basis and withdraws only gains
      */
-    function withdrawProfit(address receiver) public whenNotPaused returns(uint256) { 
+    function withdrawProfit(address receiver) public whenNotPaused returns (uint256) {
         uint256 userShares = balanceOf(msg.sender);
-        if(userShares == 0) {
+        if (userShares == 0) {
             revert VaultUSDC__NoShares();
         }
 
-        uint256 currentValue = convertToAssets(userShares); 
+        uint256 currentValue = convertToAssets(userShares);
         uint256 costBasis = userCostBasis[msg.sender];
 
-        if(currentValue <= costBasis) {
+        if (currentValue <= costBasis) {
             return 0;
         }
 
@@ -361,11 +397,11 @@ contract VaultUSDC is ERC4626, Ownable, Pausable, ReentrancyGuard {
     function totalAssets() public view override returns (uint256) {
         uint256 vaultBalance = IERC20(asset()).balanceOf(address(this));
         uint256 strategyBalance = 0;
-        
+
         if (strategy != address(0)) {
             strategyBalance = IStrategy(strategy).balanceOf();
         }
-        
+
         return vaultBalance + strategyBalance;
     }
 
@@ -385,9 +421,9 @@ contract VaultUSDC is ERC4626, Ownable, Pausable, ReentrancyGuard {
     function updateTargetLiquidity(uint256 newTargetBPS) external onlyOwner {
         require(newTargetBPS <= 5000, "Max 50%");
         require(newTargetBPS >= 500, "Min 5%");
-        
-        uint256 oldTarget = targetLiquidityBPS; 
-        targetLiquidityBPS = newTargetBPS;      
+
+        uint256 oldTarget = targetLiquidityBPS;
+        targetLiquidityBPS = newTargetBPS;
     }
 
     /**
@@ -437,7 +473,17 @@ contract VaultUSDC is ERC4626, Ownable, Pausable, ReentrancyGuard {
      * @return totalWithdrawals Total amount withdrawn by user
      * @return firstDepositTime Timestamp of first deposit
      */
-    function getUserInfo(address user) external view returns (uint256 totalShares, uint256 totalAssets, uint256 totalDeposits, uint256 totalWithdrawals, uint256 firstDepositTime) {
+    function getUserInfo(address user)
+        external
+        view
+        returns (
+            uint256 totalShares,
+            uint256 totalAssets,
+            uint256 totalDeposits,
+            uint256 totalWithdrawals,
+            uint256 firstDepositTime
+        )
+    {
         totalShares = balanceOf(user);
         totalAssets = convertToAssets(totalShares);
         totalDeposits = userTotalDeposited[user];
@@ -454,7 +500,18 @@ contract VaultUSDC is ERC4626, Ownable, Pausable, ReentrancyGuard {
      * @return currentMaxWithdraw Current maximum withdrawal limit
      * @return currentManagementFee Current management fee in basis points
      */
-    function getVaultStats() external view returns (uint256 totalValueLocked, uint256 activeUsers, uint256 feesCollected, uint256 currentMaxDeposit, uint256 currentMaxWithdraw, uint256 currentManagementFee) {
+    function getVaultStats()
+        external
+        view
+        returns (
+            uint256 totalValueLocked,
+            uint256 activeUsers,
+            uint256 feesCollected,
+            uint256 currentMaxDeposit,
+            uint256 currentMaxWithdraw,
+            uint256 currentManagementFee
+        )
+    {
         totalValueLocked = totalAssets();
         activeUsers = totalUsers;
         feesCollected = totalFeesCollected;
@@ -513,10 +570,15 @@ contract VaultUSDC is ERC4626, Ownable, Pausable, ReentrancyGuard {
      * @param _managementFee New management fee in basis points (max 1000 = 10%)
      * @dev Only callable by owner
      */
-    function updateVaultParameters(uint256 _maxDeposit, uint256 _maxWithdraw, uint256 _managementFee) external onlyOwner {
+    function updateVaultParameters(uint256 _maxDeposit, uint256 _maxWithdraw, uint256 _managementFee)
+        external
+        onlyOwner
+    {
         require(_managementFee <= 1000, "Fee cannot exceed 10%");
-        
-        emit VaultParametersUpdated(maxDepositLimit, _maxDeposit, maxWithdrawLimit, _maxWithdraw, managementFee, _managementFee);
+
+        emit VaultParametersUpdated(
+            maxDepositLimit, _maxDeposit, maxWithdrawLimit, _maxWithdraw, managementFee, _managementFee
+        );
 
         maxDepositLimit = _maxDeposit;
         maxWithdrawLimit = _maxWithdraw;
