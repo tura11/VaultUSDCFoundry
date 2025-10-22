@@ -203,4 +203,5 @@ contract VaultHandler is Test {
     function getUsers() public view returns (address[] memory) {
         return users;
     }
+    
 }
